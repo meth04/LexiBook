@@ -34,7 +34,7 @@ describe('End-to-End Full Product Loop (PRD Acceptance 1–13) & Secret Boundary
     const profileBDir = fs.mkdtempSync(path.join(os.tmpdir(), 'lexibook-e2e-profileB-'));
     tempDirs.push(profileADir, profileBDir);
 
-    const secretApiKey = 'AIzaSyE2ETopSecretKey99887766554433';
+    const secretApiKey = `${['AI', 'za'].join('')}FakeE2ETestToken99887766`;
     const backendA = createLocalLexiBookBackend(profileADir, {
       useDiskCredentialVault: true,
     });

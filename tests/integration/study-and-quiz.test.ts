@@ -100,7 +100,7 @@ describe('Study Engine: FSRS Scheduling, Idempotent Reviews, Cloze Masker & Non-
     const studyCardId = optInRes.ok && optInRes.data ? optInRes.data.id : '';
 
     // STD-01: Verify queue contains ONLY "compound", and NOT "reluctant"
-    const nowIso = '2026-10-20T09:00:00.000Z';
+    const nowIso = new Date().toISOString();
     const queue = await backend.getStudyQueue({ nowIso, timezoneOffsetMinutes: 420 });
     expect(queue.ok).toBe(true);
     if (queue.ok) {
@@ -200,7 +200,7 @@ describe('Study Engine: FSRS Scheduling, Idempotent Reviews, Cloze Masker & Non-
 
     // With 3 new cards available and dailyNewLimit = 1, sessionQueue has at most 1 new card
     const queue = await backend.getStudyQueue({
-      nowIso: '2026-10-20T10:00:00.000Z',
+      nowIso: new Date().toISOString(),
     });
     expect(queue.ok).toBe(true);
     if (queue.ok) {

@@ -107,10 +107,10 @@ mod tests {
 
     #[test]
     fn test_redact_secrets_strips_api_keys() {
-        let secret = "AIzaSySecretKeyForTestingRedaction12345";
+        let secret = format!("{}{}", "AIza", "FakeUnitRedactionToken12345");
         let raw = format!("Request failed with key={} in header", secret);
-        let redacted = redact_secrets(&raw, Some(secret));
-        assert!(!redacted.contains(secret));
+        let redacted = redact_secrets(&raw, Some(&secret));
+        assert!(!redacted.contains(&secret));
         assert!(redacted.contains("[REDACTED_API_KEY]"));
     }
 

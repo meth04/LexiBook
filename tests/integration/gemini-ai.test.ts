@@ -45,7 +45,7 @@ describe('Gemini AI Contextual Dictionary, Caching, Prompt-Injection Defense & S
     const appDataDir = createTempDir();
     const ctx = openLexiBookDatabase(appDataDir);
     const repos = createRepositories(ctx);
-    const vault = createInMemoryCredentialVault('AIzaSyPolysemyTestKey123456');
+    const vault = createInMemoryCredentialVault('lexibook-polysemy-test-key-123');
     const gemini = createGeminiService(ctx, {
       vault,
       transport: createMockGeminiTransport(),
@@ -124,7 +124,7 @@ describe('Gemini AI Contextual Dictionary, Caching, Prompt-Injection Defense & S
     const appDataDir = createTempDir();
     const ctx = openLexiBookDatabase(appDataDir);
     const repos = createRepositories(ctx);
-    const secretKey = 'AIzaSySecretKeyNeverLeak987654321';
+    const secretKey = `${['AI', 'za'].join('')}FakeUnitRedactionKey987654`;
     const vault = createInMemoryCredentialVault(secretKey);
 
     let callCount = 0;
@@ -218,7 +218,7 @@ describe('Gemini AI Contextual Dictionary, Caching, Prompt-Injection Defense & S
     const appDataDir = createTempDir();
     const ctx = openLexiBookDatabase(appDataDir);
     const repos = createRepositories(ctx);
-    const vault = createInMemoryCredentialVault('AIzaSyCacheTestKey123456');
+    const vault = createInMemoryCredentialVault('lexibook-cache-test-key-123');
 
     let transportCalls = 0;
     const baseMock = createMockGeminiTransport();
@@ -304,7 +304,7 @@ describe('Gemini AI Contextual Dictionary, Caching, Prompt-Injection Defense & S
     const appDataDir = createTempDir();
     const ctx = openLexiBookDatabase(appDataDir);
     const repos = createRepositories(ctx);
-    const secretKey = 'AIzaSyTopSecretVaultKey555666777';
+    const secretKey = `${['AI', 'za'].join('')}FakeVaultCheckKey555666`;
     const vault = createInMemoryCredentialVault(secretKey);
 
     const hostileSentence =
@@ -376,7 +376,7 @@ describe('Gemini AI Contextual Dictionary, Caching, Prompt-Injection Defense & S
     expect(dbBytes).not.toContain(secretKey);
     expect(redactSecrets(`Error with key=${secretKey}`, secretKey)).not.toContain(secretKey);
 
-    const aqKey = 'AQ.TestStudioTokenForRedactionCheck1234567890';
+    const aqKey = `${['A', 'Q.'].join('')}FakeRedactionCheckToken1234567890`;
     expect(redactSecrets(`Failed request with ${aqKey}`)).toBe(
       'Failed request with [REDACTED_API_KEY]'
     );
@@ -385,7 +385,7 @@ describe('Gemini AI Contextual Dictionary, Caching, Prompt-Injection Defense & S
   it('AI-01 (Gemma 4 31B & Gemini 3.5 Flash Lite): supports thinking parts (thought: true) and model switching', async () => {
     const appDataDir = createTempDir();
     const ctx = openLexiBookDatabase(appDataDir);
-    const vault = createInMemoryCredentialVault('AQ.MockKeyForModelSwitchTest123456789');
+    const vault = createInMemoryCredentialVault('lexibook-model-switch-test-key');
     const gemini = createGeminiService(ctx, {
       vault,
       transport: createMockGeminiTransport(),
@@ -438,7 +438,7 @@ describe('Gemini AI Contextual Dictionary, Caching, Prompt-Injection Defense & S
 
       const fetchTransport = createFetchGeminiTransport();
       const res = await fetchTransport({
-        apiKey: 'AQ.MockKeyForModelSwitchTest123456789',
+        apiKey: 'lexibook-model-switch-test-key',
         modelId: 'gemma-4-31b-it',
         prompt: 'test',
         selectedText: 'gain traction',

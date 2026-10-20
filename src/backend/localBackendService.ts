@@ -53,7 +53,7 @@ export function createLocalLexiBookBackend(
     options?.vault ??
     (options?.useDiskCredentialVault
       ? createLocalEncryptedCredentialVault(path.join(appDataDir, '.credentials'))
-      : createInMemoryCredentialVault(options?.initialApiKey ?? 'AIzaSyLocalMockKeyForDevAndTest123456'));
+      : createInMemoryCredentialVault(options?.initialApiKey ?? 'lexibook-local-mock-key-dev'));
 
   const defaultTransport = options?.useDiskCredentialVault
     ? createSmartGeminiTransport()

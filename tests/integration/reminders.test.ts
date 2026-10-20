@@ -287,11 +287,11 @@ describe('Windows Reminders & Settings Integration (NTF-01, NTF-02)', () => {
 
     // Verify BYOK API key is submitted and never echoed back into input field
     const keyInput = screen.getByLabelText('Khóa Google Gemini API') as HTMLInputElement;
-    fireEvent.change(keyInput, { target: { value: 'AIzaSyTestSecretKeyValue123456' } });
+    fireEvent.change(keyInput, { target: { value: 'lexibook-test-secret-key-123456' } });
     fireEvent.click(screen.getByText('Lưu khóa API'));
 
     await waitFor(() => {
-      expect(setAiKeySpy).toHaveBeenCalledWith('AIzaSyTestSecretKeyValue123456', 'gemini-2.5-flash');
+      expect(setAiKeySpy).toHaveBeenCalledWith('lexibook-test-secret-key-123456', 'gemini-2.5-flash');
     });
     expect(keyInput.value).toBe('');
     expect(screen.getByTestId('ai-key-status-badge').textContent).toContain(

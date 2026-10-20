@@ -196,7 +196,7 @@ describe('PDF Reader, Text Selection, Context Extraction & Zoom-Stable Highlight
     });
 
     // Now configure API key and click Retry
-    await backend.setAiKey('AIzaSyTestRetryKey9999999999');
+    await backend.setAiKey('lexibook-test-retry-key-9999');
     fireEvent.click(screen.getByTestId('retry-ai-btn'));
 
     await waitFor(() => {

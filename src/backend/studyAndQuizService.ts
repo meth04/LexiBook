@@ -321,7 +321,7 @@ export function getStudyQueue(
     (v) => v.card.fsrsState.reps > 0 && v.card.dueAt <= nowIso
   );
   const allNewCards = allEnabledViews.filter(
-    (v) => v.card.fsrsState.reps === 0 && v.card.dueAt <= nowIso
+    (v) => v.card.fsrsState.reps === 0
   );
 
   const remainingReviewSlots = Math.max(0, dailyReviewLimit - reviewedTodayCount);
