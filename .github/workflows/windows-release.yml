@@ -72,7 +72,7 @@ jobs:
           cargo test
 
       - name: Build Windows Tauri v2 MSI & NSIS installers
-        run: npm run tauri build
+        run: npx tauri build
 
       - name: Compute SHA-256 checksums for Windows installers
         shell: pwsh

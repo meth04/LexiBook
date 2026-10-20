@@ -1,5 +1,18 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  ArrowLeft,
+  BookMarked,
+  ChevronLeft,
+  ChevronRight,
+  Edit3,
+  PanelRightClose,
+  PanelRightOpen,
+  RotateCw,
+  Search,
+  Sparkles,
+  Trash2,
+} from 'lucide-react';
+import {
   createTextAnchor,
   normalizedQuadToViewportRect,
   rectToNormalizedQuad,
@@ -50,7 +63,7 @@ export const ReaderScreen: React.FC<ReaderScreenProps> = ({
   const [zoomScale, setZoomScale] = useState<number>(1.0);
   const [rotation, setRotation] = useState<number>(0);
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(true);
-  const [sidebarWidth, setSidebarWidth] = useState<number>(360);
+  const [sidebarWidth, setSidebarWidth] = useState<number>(380);
   const [sidebarScope, setSidebarScope] = useState<'book' | 'page'>('book');
   const [sidebarSearch, setSidebarSearch] = useState<string>('');
   const [sidebarSort, setSidebarSort] = useState<'recent' | 'page' | 'name'>('recent');
@@ -207,7 +220,7 @@ export const ReaderScreen: React.FC<ReaderScreenProps> = ({
     setPageInputText(String(currentPage));
   }, [currentPage]);
 
-  // Extract ONLY the current page's text on-demand when navigating pages (never scans all 355 pages)
+  // Extract ONLY the current page's text on-demand when navigating pages
   useEffect(() => {
     if (!pdfBytesBase64) return;
     let active = true;
@@ -499,6 +512,25 @@ export const ReaderScreen: React.FC<ReaderScreenProps> = ({
     }
   };
 
+  const handleStartResizeSidebar = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    const startX = e.clientX;
+    const initialWidth = sidebarWidth;
+
+    const onMouseMove = (moveEvent: MouseEvent) => {
+      const delta = startX - moveEvent.clientX;
+      setSidebarWidth(Math.max(300, Math.min(540, initialWidth + delta)));
+    };
+
+    const onMouseUp = () => {
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', onMouseUp);
+    };
+
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onMouseUp);
+  };
+
   const currentPageHighlights = useMemo(
     () => highlights.filter((h) => h.highlight.pageNumber1Based === currentPage),
     [highlights, currentPage]
@@ -549,47 +581,56 @@ export const ReaderScreen: React.FC<ReaderScreenProps> = ({
 
   if (loading) {
     return (
-      <div className="p-8 text-center text-stone-600" role="status">
+      <div className="p-12 text-center text-[#52525B]" role="status">
         Đang tải trang đọc sách PDF...
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-3.75rem)] bg-stone-100 overflow-hidden">
-      {/* Top Reader Toolbar */}
-      <div className="bg-white border-b border-stone-200 px-4 py-2.5 flex flex-wrap items-center justify-between gap-3 shrink-0">
-        <div className="flex items-center gap-3">
-          <Button variant="secondary" size="sm" onClick={onBackToLibrary}>
+    <div className="flex flex-col h-[calc(100vh-3.5rem)] bg-[#EFECE6] overflow-hidden">
+      {/* Sleek Unified Reader Toolbar */}
+      <div className="bg-white border-b border-[#E4E1DA] px-4 py-2 flex flex-wrap items-center justify-between gap-3 shrink-0 shadow-2xs">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <Button
+            variant="secondary"
+            size="sm"
+            leftIcon={<ArrowLeft className="w-3.5 h-3.5" />}
+            onClick={onBackToLibrary}
+          >
             ← Thư viện
           </Button>
-          <div>
-            <h2 className="text-sm font-semibold text-stone-900 line-clamp-1" data-testid="reader-book-title">
+          <div className="min-w-0">
+            <h2
+              className="text-sm font-semibold text-[#18181B] truncate max-w-[260px] lg:max-w-[360px]"
+              data-testid="reader-book-title"
+              title={book?.title}
+            >
               {book?.title ?? 'Tài liệu PDF'}
             </h2>
-            <p className="text-xs text-stone-500">
-              Trang {currentPage} / {book?.pageCount ?? 1}
-            </p>
           </div>
         </div>
 
-        {/* Page Navigation & In-PDF Search */}
-        <div className="flex items-center gap-2">
+        {/* Center Page Navigation & In-PDF Search */}
+        <div className="flex items-center gap-1.5 bg-[#F7F5F0] px-2 py-1 rounded-xl border border-[#E4E1DA]">
           <Button
-            variant="secondary"
+            variant="ghost"
             size="sm"
             disabled={!book || currentPage <= 1}
             onClick={() => void handlePageChange(currentPage - 1)}
             data-testid="prev-page-btn"
+            leftIcon={<ChevronLeft className="w-3.5 h-3.5" />}
           >
             Trang trước
           </Button>
+
           <span
-            className="px-2.5 py-1 text-xs font-medium bg-stone-100 rounded border border-stone-200"
+            className="px-2 py-0.5 text-xs font-semibold text-[#18181B] select-none"
             data-testid="page-indicator"
           >
             Trang {currentPage} / {book?.pageCount ?? 1}
           </span>
+
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -598,7 +639,7 @@ export const ReaderScreen: React.FC<ReaderScreenProps> = ({
                 void handlePageChange(parsed);
               }
             }}
-            className="inline-flex items-center gap-1"
+            className="inline-flex items-center"
           >
             <input
               type="number"
@@ -608,28 +649,33 @@ export const ReaderScreen: React.FC<ReaderScreenProps> = ({
               onChange={(e) => setPageInputText(e.target.value)}
               aria-label="Đi tới số trang"
               title="Nhập số trang và nhấn Enter để chuyển nhanh"
-              className="w-16 px-2 py-1 text-xs rounded border border-stone-300 text-center"
+              className="w-14 px-1.5 py-0.5 text-xs rounded-md border border-[#D6D2C8] bg-white text-center font-medium text-[#18181B]"
               data-testid="jump-page-input"
             />
           </form>
+
           <Button
-            variant="secondary"
+            variant="ghost"
             size="sm"
             disabled={!book || currentPage >= book.pageCount}
             onClick={() => void handlePageChange(currentPage + 1)}
             data-testid="next-page-btn"
           >
             Trang sau
+            <ChevronRight className="w-3.5 h-3.5 ml-0.5 inline" />
           </Button>
 
-          <div className="relative ml-2">
+          <div className="h-4 w-px bg-[#D6D2C8] mx-1" />
+
+          <div className="relative flex items-center">
+            <Search className="w-3.5 h-3.5 text-[#71717A] absolute left-2 pointer-events-none" />
             <input
               type="search"
               value={inPdfQuery}
               onChange={(e) => setInPdfQuery(e.target.value)}
-              placeholder="Tìm trong PDF..."
+              placeholder="Tìm trong trang..."
               aria-label="Tìm trong PDF"
-              className="w-44 px-2.5 py-1 text-xs rounded border border-stone-300 focus:outline-none focus:ring-2 focus:ring-indigo-600"
+              className="w-36 pl-7 pr-2 py-1 text-xs rounded-md border border-[#D6D2C8] bg-white text-[#18181B] focus:outline-none focus:border-[#3F51B5]"
               data-testid="in-pdf-search-input"
             />
             {inPdfMatches.length > 0 && (
@@ -639,7 +685,7 @@ export const ReaderScreen: React.FC<ReaderScreenProps> = ({
                     key={m.pageNumber1Based}
                     type="button"
                     onClick={() => void handlePageChange(m.pageNumber1Based)}
-                    className="px-1.5 py-0.5 text-[11px] bg-amber-100 text-amber-900 rounded hover:bg-amber-200"
+                    className="px-1.5 py-0.5 text-[11px] font-semibold bg-[#FEF3C7] text-[#92400E] rounded-md"
                   >
                     Tr.{m.pageNumber1Based} ({m.count})
                   </button>
@@ -649,31 +695,34 @@ export const ReaderScreen: React.FC<ReaderScreenProps> = ({
           </div>
         </div>
 
-        {/* Zoom, Rotation & Sidebar Toggle */}
+        {/* Right Zoom, Rotation & Sidebar Toggle */}
         <div className="flex items-center gap-1.5">
-          {ZOOM_PRESETS.map((preset) => {
-            const pct = Math.round(preset * 100);
-            const active = Math.abs(zoomScale - preset) < 0.01;
-            return (
-              <button
-                key={pct}
-                type="button"
-                onClick={() => setZoomScale(preset)}
-                data-testid={`zoom-${pct}`}
-                className={`px-2 py-1 text-xs rounded font-medium transition-colors ${
-                  active
-                    ? 'bg-indigo-600 text-white'
-                    : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
-                }`}
-              >
-                {pct}%
-              </button>
-            );
-          })}
+          <div className="inline-flex items-center bg-[#F3F1EC] p-0.5 rounded-lg border border-[#E4E1DA]">
+            {ZOOM_PRESETS.map((preset) => {
+              const pct = Math.round(preset * 100);
+              const active = Math.abs(zoomScale - preset) < 0.01;
+              return (
+                <button
+                  key={pct}
+                  type="button"
+                  onClick={() => setZoomScale(preset)}
+                  data-testid={`zoom-${pct}`}
+                  className={`px-2 py-1 text-xs rounded-md font-medium transition-all cursor-pointer ${
+                    active
+                      ? 'bg-[#3F51B5] text-white shadow-2xs'
+                      : 'text-[#52525B] hover:text-[#18181B]'
+                  }`}
+                >
+                  {pct}%
+                </button>
+              );
+            })}
+          </div>
 
           <Button
             variant="secondary"
             size="sm"
+            leftIcon={<RotateCw className="w-3.5 h-3.5" />}
             onClick={() => setRotation((r) => (r + 90) % 360)}
             data-testid="rotate-page-btn"
           >
@@ -683,6 +732,13 @@ export const ReaderScreen: React.FC<ReaderScreenProps> = ({
           <Button
             variant="secondary"
             size="sm"
+            leftIcon={
+              sidebarOpen ? (
+                <PanelRightClose className="w-3.5 h-3.5" />
+              ) : (
+                <PanelRightOpen className="w-3.5 h-3.5" />
+              )
+            }
             onClick={() => setSidebarOpen((open) => !open)}
             data-testid="toggle-sidebar-btn"
           >
@@ -702,7 +758,7 @@ export const ReaderScreen: React.FC<ReaderScreenProps> = ({
         <div
           role="alert"
           data-testid="scan-only-banner"
-          className="bg-amber-50 border-b border-amber-300 px-4 py-2.5 text-xs text-amber-900 flex items-center justify-between"
+          className="bg-[#FEF3C7] border-b border-[#F59E0B]/40 px-4 py-2.5 text-xs text-[#92400E] flex items-center justify-between"
         >
           <span>
             <strong>Tài liệu PDF dạng ảnh quét (Scan)</strong> — Chưa hỗ trợ OCR trong phiên bản
@@ -715,20 +771,27 @@ export const ReaderScreen: React.FC<ReaderScreenProps> = ({
       {/* Main Split Reader + Sidebar Workspace */}
       <div className="flex-1 flex overflow-hidden">
         {/* Left/Center PDF Reading Canvas (~68% width) */}
-        <div className="flex-1 flex flex-col overflow-auto p-4 items-center bg-stone-200/70">
-          {/* Quick Phrase Selection Bar for Keyboard & Assistive / Deterministic Selection */}
+        <div className="flex-1 flex flex-col overflow-auto px-4 py-4 items-center bg-[#EAE6DF]/80">
+          {/* Compact Quick Phrase Bar */}
           {!isScanOnly && pageExtraction && (
-            <div className="w-full max-w-4xl mb-3 bg-white border border-stone-200 rounded-lg px-3.5 py-2 flex flex-wrap items-center justify-between gap-2 shadow-xs">
-              <div className="flex items-center gap-2 text-xs text-stone-600">
-                <span className="font-medium text-stone-800">Bôi đen từ trên trang hoặc nhập cụm từ:</span>
+            <div className="w-full max-w-3xl mb-3 bg-white/95 backdrop-blur border border-[#E4E1DA] rounded-xl px-3.5 py-2 flex flex-wrap items-center justify-between gap-2 shadow-2xs">
+              <div className="flex flex-wrap items-center gap-2 text-xs text-[#52525B] flex-1">
+                <span className="font-medium text-[#18181B]">
+                  Bôi đen trực tiếp trên trang PDF hoặc nhập cụm từ:
+                </span>
                 <input
                   type="text"
                   value={customPhraseInput}
                   onChange={(e) => setCustomPhraseInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && customPhraseInput.trim()) {
+                      initiateSelection(customPhraseInput);
+                    }
+                  }}
                   placeholder="Nhập từ/cụm từ trên trang (vd: compound, gain traction)..."
                   aria-label="Nhập cụm từ cần đánh dấu trên trang"
                   data-testid="quick-select-input"
-                  className="w-64 px-2.5 py-1 text-xs border border-stone-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                  className="flex-1 min-w-[200px] px-2.5 py-1 text-xs border border-[#D6D2C8] rounded-lg bg-[#FAF9F6] focus:bg-white focus:outline-none focus:border-[#3F51B5]"
                 />
                 <Button
                   variant="secondary"
@@ -740,25 +803,26 @@ export const ReaderScreen: React.FC<ReaderScreenProps> = ({
                   Chọn cụm từ
                 </Button>
               </div>
-              {pageExtraction.isTwoColumn && (
-                <Badge variant="amber">Trang bố cục 2 cột</Badge>
-              )}
+              {pageExtraction.isTwoColumn && <Badge variant="amber">Trang bố cục 2 cột</Badge>}
             </div>
           )}
 
-          {/* Non-blocking Selection Confirmation Bar */}
+          {/* Non-blocking Floating/Sticky Selection Confirmation Bar */}
           {selectionDraft && (
             <div
               role="region"
               aria-label="Xác nhận đánh dấu từ vựng"
               data-testid="selection-confirm-bar"
-              className="w-full max-w-4xl mb-4 bg-amber-50 border border-amber-300 rounded-xl p-3.5 shadow-sm"
+              className="sticky top-1 z-30 w-full max-w-3xl mb-3 bg-white border-2 border-[#3F51B5] rounded-2xl p-4 shadow-lg"
             >
-              <div className="flex flex-wrap items-start justify-between gap-3">
+              <div className="flex flex-wrap items-start justify-between gap-4">
                 <div className="flex-1 min-w-[260px]">
-                  <div className="flex items-center gap-2 mb-1">
+                  <div className="flex items-center gap-2 mb-1.5">
                     <Badge variant="amber">Cụm từ đã chọn</Badge>
-                    <span className="font-bold text-stone-900 text-sm" data-testid="selected-phrase-preview">
+                    <span
+                      className="font-bold text-[#18181B] text-base"
+                      data-testid="selected-phrase-preview"
+                    >
                       {selectionDraft.selectedText}
                     </span>
                   </div>
@@ -767,7 +831,7 @@ export const ReaderScreen: React.FC<ReaderScreenProps> = ({
                     <div className="mt-2">
                       <label
                         htmlFor="editable-context-sentence"
-                        className="block text-xs font-medium text-amber-900 mb-1"
+                        className="block text-xs font-medium text-[#92400E] mb-1"
                       >
                         Bố cục trang phức tạp (2 cột): Bạn có thể kiểm tra hoặc chỉnh sửa câu ngữ
                         cảnh trước khi lưu:
@@ -778,24 +842,28 @@ export const ReaderScreen: React.FC<ReaderScreenProps> = ({
                         rows={2}
                         value={editableSentence}
                         onChange={(e) => setEditableSentence(e.target.value)}
-                        className="w-full text-xs p-2 rounded border border-amber-400 bg-white text-stone-900"
+                        className="w-full text-xs p-2.5 rounded-lg border border-[#F59E0B] bg-[#FEF3C7]/20 text-[#18181B]"
                       />
                     </div>
                   ) : (
-                    <p className="text-xs text-stone-700 italic mt-1" data-testid="selected-sentence-preview">
+                    <p
+                      className="text-xs text-[#52525B] italic mt-1 border-l-2 border-[#F59E0B] pl-2.5"
+                      data-testid="selected-sentence-preview"
+                    >
                       “{editableSentence}”
                     </p>
                   )}
                 </div>
 
-                <div className="flex items-center gap-2 shrink-0">
+                <div className="flex flex-wrap items-center gap-2 shrink-0">
                   <Button
                     variant="primary"
                     size="sm"
+                    leftIcon={<Sparkles className="w-3.5 h-3.5" />}
                     onClick={() => void handleConfirmHighlight(true)}
                     data-testid="confirm-highlight-btn"
                   >
-                    Lưu đánh dấu & Giải thích ngữ cảnh
+                    Lưu đánh dấu &amp; Giải thích ngữ cảnh
                   </Button>
                   <Button
                     variant="secondary"
@@ -829,7 +897,7 @@ export const ReaderScreen: React.FC<ReaderScreenProps> = ({
               width: `${viewportWidth}px`,
               minHeight: `${viewportHeight}px`,
             }}
-            className={`relative bg-white shadow-md border border-stone-300 rounded-sm transition-all select-text ${
+            className={`relative bg-white shadow-xl border border-[#D6D2C8] rounded-sm transition-all select-text ${
               canvasRendered ? 'p-0 overflow-hidden' : 'p-8'
             }`}
           >
@@ -843,7 +911,10 @@ export const ReaderScreen: React.FC<ReaderScreenProps> = ({
             />
 
             {/* Layer 2: Persisted Highlight Overlays */}
-            <div className="pointer-events-none absolute inset-0 z-10" data-testid="highlight-overlay-layer">
+            <div
+              className="pointer-events-none absolute inset-0 z-10"
+              data-testid="highlight-overlay-layer"
+            >
               {currentPageHighlights.map((item) => {
                 const anchorCheck =
                   pageExtraction && book
@@ -888,7 +959,7 @@ export const ReaderScreen: React.FC<ReaderScreenProps> = ({
                       }`}
                       className={`pointer-events-auto cursor-pointer absolute rounded-xs transition-all mix-blend-multiply ${
                         isFocused
-                          ? 'bg-amber-300/65 ring-2 ring-indigo-600'
+                          ? 'bg-amber-300/65 ring-2 ring-[#3F51B5]'
                           : 'bg-amber-200/50 hover:bg-amber-300/65'
                       }`}
                     />
@@ -899,11 +970,11 @@ export const ReaderScreen: React.FC<ReaderScreenProps> = ({
 
             {/* Layer 3: Selectable Text Layer Overlaid at Exact PDF Coordinates */}
             {isScanOnly ? (
-              <div className="h-96 flex flex-col items-center justify-center text-stone-400 border-2 border-dashed border-stone-200 rounded-lg p-6 text-center">
-                <p className="text-sm font-medium text-stone-600 mb-1">
+              <div className="h-96 flex flex-col items-center justify-center text-[#71717A] border-2 border-dashed border-[#E4E1DA] rounded-xl p-6 text-center">
+                <p className="text-sm font-medium text-[#18181B] mb-1">
                   Trang {currentPage} (Bản quét hình ảnh — Không có lớp văn bản)
                 </p>
-                <p className="text-xs text-stone-500 max-w-md">
+                <p className="text-xs text-[#52525B] max-w-md">
                   Tệp PDF này chỉ chứa dữ liệu điểm ảnh quét (scanned page) và không có toán tử văn
                   bản có thể bôi đen.
                 </p>
@@ -1023,43 +1094,55 @@ export const ReaderScreen: React.FC<ReaderScreenProps> = ({
             aria-label="Bảng từ vựng theo sách"
             data-testid="reader-vocab-sidebar"
             style={{ width: `${sidebarWidth}px` }}
-            className="bg-white border-l border-stone-200 flex flex-col shrink-0 h-full overflow-hidden"
+            className="relative bg-white border-l border-[#E4E1DA] flex flex-col shrink-0 h-full overflow-hidden shadow-sm"
           >
+            {/* Interactive Drag Handle */}
+            <div
+              role="separator"
+              aria-orientation="vertical"
+              title="Kéo để thay đổi độ rộng bảng từ vựng"
+              onMouseDown={handleStartResizeSidebar}
+              className="absolute left-0 top-0 bottom-0 w-1.5 cursor-col-resize hover:bg-[#3F51B5]/30 z-20 transition-colors"
+            />
+
             {/* Sidebar Header & Scope Tabs */}
-            <div className="p-3.5 border-b border-stone-200 space-y-2.5">
+            <div className="p-3.5 border-b border-[#E4E1DA] bg-[#FAF9F6] space-y-2.5">
               <div className="flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-stone-900">
-                  Từ vựng đã đánh dấu ({highlights.length})
-                </h3>
+                <div className="flex items-center gap-2">
+                  <BookMarked className="w-4 h-4 text-[#3F51B5]" />
+                  <h3 className="text-sm font-semibold text-[#18181B]">
+                    Từ vựng đã đánh dấu ({highlights.length})
+                  </h3>
+                </div>
                 <div className="flex items-center gap-1">
                   <button
                     type="button"
                     title="Thu hẹp bảng bên"
-                    onClick={() => setSidebarWidth((w) => Math.max(280, w - 40))}
-                    className="px-1.5 py-0.5 text-xs text-stone-500 hover:bg-stone-100 rounded"
+                    onClick={() => setSidebarWidth((w) => Math.max(300, w - 40))}
+                    className="px-1.5 py-0.5 text-xs text-[#52525B] hover:bg-[#EFECE6] rounded cursor-pointer"
                   >
                     ◀
                   </button>
                   <button
                     type="button"
                     title="Mở rộng bảng bên"
-                    onClick={() => setSidebarWidth((w) => Math.min(460, w + 40))}
-                    className="px-1.5 py-0.5 text-xs text-stone-500 hover:bg-stone-100 rounded"
+                    onClick={() => setSidebarWidth((w) => Math.min(520, w + 40))}
+                    className="px-1.5 py-0.5 text-xs text-[#52525B] hover:bg-[#EFECE6] rounded cursor-pointer"
                   >
                     ▶
                   </button>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-1 bg-stone-100 p-1 rounded-lg">
+              <div className="grid grid-cols-2 gap-1 bg-[#EFECE6] p-1 rounded-xl">
                 <button
                   type="button"
                   onClick={() => setSidebarScope('book')}
                   data-testid="sidebar-tab-book"
-                  className={`py-1 text-xs font-medium rounded-md transition-colors ${
+                  className={`py-1.5 text-xs font-medium rounded-lg transition-all cursor-pointer ${
                     sidebarScope === 'book'
-                      ? 'bg-white text-stone-900 shadow-xs'
-                      : 'text-stone-600 hover:text-stone-900'
+                      ? 'bg-white text-[#18181B] font-semibold shadow-2xs'
+                      : 'text-[#52525B] hover:text-[#18181B]'
                   }`}
                 >
                   Tất cả trong sách ({highlights.length})
@@ -1068,10 +1151,10 @@ export const ReaderScreen: React.FC<ReaderScreenProps> = ({
                   type="button"
                   onClick={() => setSidebarScope('page')}
                   data-testid="sidebar-tab-page"
-                  className={`py-1 text-xs font-medium rounded-md transition-colors ${
+                  className={`py-1.5 text-xs font-medium rounded-lg transition-all cursor-pointer ${
                     sidebarScope === 'page'
-                      ? 'bg-white text-stone-900 shadow-xs'
-                      : 'text-stone-600 hover:text-stone-900'
+                      ? 'bg-white text-[#18181B] font-semibold shadow-2xs'
+                      : 'text-[#52525B] hover:text-[#18181B]'
                   }`}
                 >
                   Trang này ({currentPageHighlights.length})
@@ -1085,7 +1168,7 @@ export const ReaderScreen: React.FC<ReaderScreenProps> = ({
                   onChange={(e) => setSidebarSearch(e.target.value)}
                   placeholder="Tìm từ đã đánh dấu..."
                   aria-label="Tìm từ đã đánh dấu"
-                  className="flex-1 px-2.5 py-1 text-xs border border-stone-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                  className="flex-1 px-2.5 py-1.5 text-xs border border-[#D6D2C8] rounded-lg bg-white focus:outline-none focus:border-[#3F51B5]"
                 />
                 <select
                   value={sidebarSort}
@@ -1093,7 +1176,7 @@ export const ReaderScreen: React.FC<ReaderScreenProps> = ({
                     setSidebarSort(e.target.value as 'recent' | 'page' | 'name')
                   }
                   aria-label="Sắp xếp từ vựng"
-                  className="px-2 py-1 text-xs border border-stone-300 rounded bg-white"
+                  className="px-2 py-1.5 text-xs border border-[#D6D2C8] rounded-lg bg-white text-[#18181B]"
                 >
                   <option value="recent">Mới nhất</option>
                   <option value="page">Theo trang</option>
@@ -1106,16 +1189,16 @@ export const ReaderScreen: React.FC<ReaderScreenProps> = ({
             {selectedOccurrence && (
               <div
                 data-testid="sidebar-detail-panel"
-                className="p-3.5 bg-stone-50 border-b border-stone-200 space-y-2.5 max-h-[52%] overflow-y-auto"
+                className="p-4 bg-white border-b-2 border-[#E4E1DA] space-y-3 max-h-[56%] overflow-y-auto"
               >
                 <div className="flex items-start justify-between gap-2">
                   <div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-base font-bold text-stone-900">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="text-lg font-bold text-[#18181B]">
                         {selectedOccurrence.lexeme.canonicalForm}
                       </span>
                       {selectedOccurrence.sense?.ipa && (
-                        <span className="text-xs text-stone-500 font-mono">
+                        <span className="text-xs text-[#3F51B5] bg-[#EEF2FF] px-2 py-0.5 rounded-md font-mono">
                           {selectedOccurrence.sense.ipa}
                         </span>
                       )}
@@ -1125,7 +1208,7 @@ export const ReaderScreen: React.FC<ReaderScreenProps> = ({
                         </Badge>
                       )}
                     </div>
-                    <p className="text-[11px] text-stone-500">
+                    <p className="text-[11px] text-[#71717A] mt-0.5">
                       Trang {selectedOccurrence.highlight.pageNumber1Based}
                     </p>
                   </div>
@@ -1143,9 +1226,12 @@ export const ReaderScreen: React.FC<ReaderScreenProps> = ({
                   <div
                     role="status"
                     data-testid="ai-loading-indicator"
-                    className="p-2.5 bg-indigo-50 border border-indigo-200 rounded-lg text-xs text-indigo-900 flex items-center justify-between"
+                    className="p-3 bg-[#EEF2FF] border border-[#6366F1]/30 rounded-xl text-xs text-[#3730A3] flex items-center justify-between"
                   >
-                    <span>Đang phân tích ngữ cảnh bằng AI...</span>
+                    <span className="inline-flex items-center gap-2 font-medium">
+                      <span className="inline-block h-3.5 w-3.5 animate-spin rounded-full border-2 border-[#3F51B5] border-t-transparent" />
+                      Đang phân tích ngữ cảnh bằng AI...
+                    </span>
                     <Button
                       variant="ghost"
                       size="sm"
@@ -1162,7 +1248,7 @@ export const ReaderScreen: React.FC<ReaderScreenProps> = ({
                   <div
                     role="alert"
                     data-testid="ai-error-panel"
-                    className="p-2.5 bg-red-50 border border-red-200 rounded-lg text-xs text-red-900 space-y-2"
+                    className="p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-900 space-y-2"
                   >
                     <p>
                       {analysisErrors[selectedOccurrence.occurrence.id] ||
@@ -1182,34 +1268,43 @@ export const ReaderScreen: React.FC<ReaderScreenProps> = ({
                   </div>
                 ) : selectedOccurrence.sense &&
                   selectedOccurrence.sense.contextualMeaningVi ? (
-                  <div className="space-y-2 text-xs">
-                    <div>
-                      <span className="font-semibold text-stone-700">Nghĩa thông dụng: </span>
-                      <span className="text-stone-800">
-                        {selectedOccurrence.sense.generalMeaningsVi.join('; ')}
-                      </span>
-                    </div>
-                    <div className="p-2 bg-amber-50/80 border border-amber-200 rounded">
-                      <span className="font-semibold text-amber-950 block mb-0.5">
-                        Nghĩa trong ngữ cảnh này:
+                  <div className="space-y-2.5 text-xs">
+                    <div className="p-3 bg-[#FEF3C7]/45 border border-[#F59E0B]/35 rounded-xl space-y-1">
+                      <span className="text-[11px] font-semibold uppercase tracking-wider text-[#92400E] block">
+                        Nghĩa trong ngữ cảnh này
                       </span>
                       <span
-                        className="text-stone-900 font-medium"
+                        className="text-sm text-[#18181B] font-bold block"
                         data-testid="detail-contextual-meaning"
                       >
                         {selectedOccurrence.sense.contextualMeaningVi}
                       </span>
-                      <p className="text-stone-700 mt-1">
+                      <p className="text-[#52525B] leading-relaxed pt-0.5">
                         {selectedOccurrence.sense.contextualExplanationVi}
                       </p>
                     </div>
+
+                    {selectedOccurrence.sense.generalMeaningsVi.length > 0 && (
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <span className="font-semibold text-[#52525B]">Nghĩa thông dụng:</span>
+                        {selectedOccurrence.sense.generalMeaningsVi.map((gm, i) => (
+                          <span
+                            key={i}
+                            className="px-2 py-0.5 rounded-md bg-[#F3F1EC] text-[#18181B] border border-[#E4E1DA]"
+                          >
+                            {gm}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 ) : (
-                  <div className="p-2.5 bg-stone-100 rounded text-xs text-stone-600 flex items-center justify-between">
+                  <div className="p-3 bg-[#FAF9F6] border border-[#E4E1DA] rounded-xl text-xs text-[#52525B] flex items-center justify-between">
                     <span>Chưa có giải thích ngữ cảnh AI.</span>
                     <Button
                       variant="primary"
                       size="sm"
+                      leftIcon={<Sparkles className="w-3.5 h-3.5" />}
                       onClick={() =>
                         void triggerAiAnalysisForOccurrence(selectedOccurrence.occurrence.id)
                       }
@@ -1221,41 +1316,47 @@ export const ReaderScreen: React.FC<ReaderScreenProps> = ({
                 )}
 
                 <div className="text-xs">
-                  <span className="font-semibold text-stone-700 block mb-0.5">
+                  <span className="font-semibold text-[#52525B] block mb-1">
                     Câu gốc trong sách:
                   </span>
-                  <blockquote className="p-2 bg-white border-l-2 border-indigo-500 text-stone-700 italic">
+                  <blockquote className="p-2.5 bg-[#FAF9F6] rounded-lg border-l-3 border-[#3F51B5] text-[#18181B] italic leading-relaxed">
                     “{selectedOccurrence.highlight.sentenceText}”
                   </blockquote>
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex flex-wrap items-center gap-1.5 pt-1">
-                  {selectedOccurrence.sense && (
-                    <>
-                      <Button
-                        variant={selectedOccurrence.studyCard?.enabled ? 'secondary' : 'primary'}
-                        size="sm"
-                        onClick={() => void handleToggleStudyOptIn(selectedOccurrence)}
-                        data-testid="sidebar-study-optin-btn"
-                      >
-                        {selectedOccurrence.studyCard?.enabled
-                          ? 'Đang trong Ôn tập'
-                          : 'Đưa vào Ôn tập'}
-                      </Button>
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        onClick={() => openEditSenseModal(selectedOccurrence)}
-                        data-testid="sidebar-edit-sense-btn"
-                      >
-                        Chỉnh sửa
-                      </Button>
-                    </>
-                  )}
+                <div className="flex flex-wrap items-center justify-between gap-1.5 pt-1">
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    {selectedOccurrence.sense && (
+                      <>
+                        <Button
+                          variant={selectedOccurrence.studyCard?.enabled ? 'secondary' : 'primary'}
+                          size="sm"
+                          leftIcon={<Sparkles className="w-3.5 h-3.5" />}
+                          onClick={() => void handleToggleStudyOptIn(selectedOccurrence)}
+                          data-testid="sidebar-study-optin-btn"
+                        >
+                          {selectedOccurrence.studyCard?.enabled
+                            ? 'Đang trong Ôn tập'
+                            : 'Đưa vào Ôn tập'}
+                        </Button>
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          leftIcon={<Edit3 className="w-3.5 h-3.5" />}
+                          onClick={() => openEditSenseModal(selectedOccurrence)}
+                          data-testid="sidebar-edit-sense-btn"
+                        >
+                          Chỉnh sửa
+                        </Button>
+                      </>
+                    )}
+                  </div>
                   <Button
                     variant="ghost"
                     size="sm"
+                    leftIcon={<Trash2 className="w-3.5 h-3.5" />}
+                    className="text-[#DC2626] hover:bg-red-50"
                     onClick={() =>
                       void handleDeleteHighlight(selectedOccurrence.highlight.id)
                     }
@@ -1268,11 +1369,14 @@ export const ReaderScreen: React.FC<ReaderScreenProps> = ({
             )}
 
             {/* Saved Highlights List */}
-            <div className="flex-1 overflow-y-auto divide-y divide-stone-100" data-testid="sidebar-highlight-list">
+            <div
+              className="flex-1 overflow-y-auto divide-y divide-[#EFECE6]"
+              data-testid="sidebar-highlight-list"
+            >
               {filteredSidebarHighlights.length === 0 ? (
-                <div className="p-6 text-center text-xs text-stone-500">
-                  Chưa có từ vựng nào được đánh dấu trong phạm vi này. Hãy chọn một từ hoặc cụm từ
-                  trên trang PDF để bắt đầu.
+                <div className="p-8 text-center text-xs text-[#71717A] leading-relaxed">
+                  Chưa có từ vựng nào được đánh dấu trong phạm vi này. Hãy bôi đen một từ hoặc cụm
+                  từ trên trang PDF để bắt đầu tra nghĩa ngữ cảnh.
                 </div>
               ) : (
                 filteredSidebarHighlights.map((item) => {
@@ -1293,19 +1397,21 @@ export const ReaderScreen: React.FC<ReaderScreenProps> = ({
                           void handlePageChange(item.highlight.pageNumber1Based);
                         }
                       }}
-                      className={`w-full text-left p-3 transition-colors hover:bg-stone-50 ${
-                        isSelected ? 'bg-indigo-50/60 border-l-4 border-indigo-600' : ''
+                      className={`w-full text-left px-4 py-3 transition-colors cursor-pointer ${
+                        isSelected
+                          ? 'bg-[#EEF2FF]/80 border-l-4 border-[#3F51B5]'
+                          : 'hover:bg-[#FAF9F6]'
                       }`}
                     >
                       <div className="flex items-center justify-between gap-2">
-                        <span className="font-semibold text-xs text-stone-900">
+                        <span className="font-semibold text-xs text-[#18181B]">
                           {item.highlight.selectedText}
                         </span>
-                        <span className="text-[11px] text-stone-500">
+                        <span className="text-[11px] font-medium px-1.5 py-0.5 rounded bg-[#F3F1EC] text-[#52525B]">
                           Tr. {item.highlight.pageNumber1Based}
                         </span>
                       </div>
-                      <p className="text-xs text-stone-600 line-clamp-1 mt-0.5">
+                      <p className="text-xs text-[#52525B] line-clamp-1 mt-1">
                         {isAnalyzing
                           ? 'Đang phân tích ngữ cảnh bằng AI...'
                           : item.sense?.contextualMeaningVi || 'Đã lưu đánh dấu ngữ cảnh'}
@@ -1325,39 +1431,39 @@ export const ReaderScreen: React.FC<ReaderScreenProps> = ({
         onClose={() => setEditingSenseOcc(null)}
         title="Chỉnh sửa nghĩa từ vựng theo ngữ cảnh"
       >
-        <form onSubmit={(e) => void handleSaveEditedSense(e)} className="space-y-3">
+        <form onSubmit={(e) => void handleSaveEditedSense(e)} className="space-y-3.5">
           <div>
-            <label className="block text-xs font-medium text-stone-700 mb-1">
+            <label className="block text-xs font-medium text-[#52525B] mb-1">
               Nghĩa trong ngữ cảnh này
             </label>
             <input
               type="text"
               value={editContextualMeaning}
               onChange={(e) => setEditContextualMeaning(e.target.value)}
-              className="w-full px-3 py-1.5 text-sm border border-stone-300 rounded"
+              className="w-full px-3 py-2 text-sm border border-[#D6D2C8] rounded-xl"
               required
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-stone-700 mb-1">
+            <label className="block text-xs font-medium text-[#52525B] mb-1">
               Giải thích tiếng Việt
             </label>
             <textarea
               rows={3}
               value={editContextualExplanation}
               onChange={(e) => setEditContextualExplanation(e.target.value)}
-              className="w-full px-3 py-1.5 text-sm border border-stone-300 rounded"
+              className="w-full px-3 py-2 text-sm border border-[#D6D2C8] rounded-xl"
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-stone-700 mb-1">
+            <label className="block text-xs font-medium text-[#52525B] mb-1">
               Nghĩa thông dụng (phân tách bằng dấu phẩy)
             </label>
             <input
               type="text"
               value={editGeneralMeanings}
               onChange={(e) => setEditGeneralMeanings(e.target.value)}
-              className="w-full px-3 py-1.5 text-sm border border-stone-300 rounded"
+              className="w-full px-3 py-2 text-sm border border-[#D6D2C8] rounded-xl"
             />
           </div>
           <div className="flex justify-end gap-2 pt-2">

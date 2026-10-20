@@ -1,4 +1,16 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  BookMarked,
+  BookOpen,
+  CheckCircle2,
+  Edit3,
+  FileText,
+  FolderPlus,
+  Search,
+  Sparkles,
+  Trash2,
+  UploadCloud,
+} from 'lucide-react';
 import { lexiBookClient } from '../../shared/api/client';
 import type { Book, BookStatus } from '../../shared/types/contracts';
 import {
@@ -15,6 +27,7 @@ export interface LibraryScreenProps {
   onOpenVocabularyForBook: (bookId: string) => void;
   showOnboarding?: boolean;
   onDismissOnboarding?: () => void;
+  onOpenSettings?: () => void;
 }
 
 interface PendingDuplicateState {
@@ -55,15 +68,25 @@ async function readFileAsBase64(file: File): Promise<string> {
   });
 }
 
+const BOOK_ACCENT_PALETTES = [
+  'from-[#3F51B5] to-[#283593]',
+  'from-[#0F766E] to-[#115E59]',
+  'from-[#B45309] to-[#92400E]',
+  'from-[#4338CA] to-[#312E81]',
+  'from-[#15803D] to-[#166534]',
+];
+
 export const LibraryScreen: React.FC<LibraryScreenProps> = ({
   onOpenBook,
   onOpenVocabularyForBook,
   showOnboarding = false,
   onDismissOnboarding,
+  onOpenSettings,
 }) => {
   const [books, setBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [importing, setImporting] = useState<boolean>(false);
+  const [isDraggingOver, setIsDraggingOver] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -111,6 +134,16 @@ export const LibraryScreen: React.FC<LibraryScreenProps> = ({
     });
   }, [books, searchQuery, statusFilter]);
 
+  const libraryStats = useMemo(() => {
+    const readingCount = books.filter((b) => b.status === 'reading').length;
+    const finishedCount = books.filter((b) => b.status === 'finished').length;
+    const totalTerms = books.reduce(
+      (acc, b) => acc + (b.uniqueTermCount ?? b.highlightCount ?? 0),
+      0
+    );
+    return { total: books.length, readingCount, finishedCount, totalTerms };
+  }, [books]);
+
   const handleImportPayload = async (fileName: string, bytesBase64: string) => {
     setImporting(true);
     setErrorMessage(null);
@@ -148,6 +181,19 @@ export const LibraryScreen: React.FC<LibraryScreenProps> = ({
       await handleImportPayload(file.name, bytesBase64);
     } catch (err) {
       setErrorMessage(err instanceof Error ? err.message : 'Lỗi đọc tệp PDF.');
+    }
+  };
+
+  const handleDropPdf = async (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    setIsDraggingOver(false);
+    const file = event.dataTransfer.files?.[0];
+    if (!file) return;
+    try {
+      const bytesBase64 = await readFileAsBase64(file);
+      await handleImportPayload(file.name, bytesBase64);
+    } catch (err) {
+      setErrorMessage(err instanceof Error ? err.message : 'Lỗi đọc tệp PDF kéo thả.');
     }
   };
 
@@ -238,35 +284,51 @@ export const LibraryScreen: React.FC<LibraryScreenProps> = ({
   };
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto" data-testid="library-screen">
+    <div
+      className="space-y-6 max-w-7xl mx-auto"
+      data-testid="library-screen"
+      onDragOver={(e) => {
+        e.preventDefault();
+        setIsDraggingOver(true);
+      }}
+      onDragLeave={() => setIsDraggingOver(false)}
+      onDrop={(e) => void handleDropPdf(e)}
+    >
       {showOnboarding && onDismissOnboarding && (
-        <OnboardingBanner onDismiss={onDismissOnboarding} />
+        <OnboardingBanner onDismiss={onDismissOnboarding} onOpenSettings={onOpenSettings} />
       )}
 
       {/* Top Header & Controls */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-white p-4 rounded-xl border border-[#E2DFD7]">
+      <div
+        className={`flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-white p-4 rounded-2xl border transition-all shadow-2xs ${
+          isDraggingOver
+            ? 'border-[#3F51B5] ring-2 ring-[#3F51B5]/20 bg-[#EEF2FF]/30'
+            : 'border-[#E4E1DA]'
+        }`}
+      >
         <div className="flex flex-1 flex-col sm:flex-row items-stretch sm:items-center gap-3">
           <div className="relative flex-1 max-w-md">
+            <Search className="w-4 h-4 text-[#71717A] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
               type="search"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Tìm kiếm sách theo tiêu đề..."
               aria-label="Tìm kiếm sách theo tiêu đề"
-              className="w-full rounded-lg border border-[#E2DFD7] bg-[#F8F6F1] px-3.5 py-2 text-sm text-[#1E2024] placeholder:text-[#525866] focus:bg-white focus:border-[#3F51B5]"
+              className="w-full rounded-xl border border-[#E4E1DA] bg-[#F7F5F0] pl-10 pr-3.5 py-2 text-sm text-[#18181B] placeholder:text-[#71717A] focus:bg-white focus:border-[#3F51B5] transition-colors"
             />
           </div>
 
           <div
             role="group"
             aria-label="Lọc theo trạng thái đọc"
-            className="inline-flex items-center rounded-lg bg-[#F1EFEA] p-1"
+            className="inline-flex items-center rounded-xl bg-[#F3F1EC] p-1 border border-[#E4E1DA]/60"
           >
             {(
               [
-                { value: 'all', label: 'Tất cả' },
-                { value: 'reading', label: 'Đang đọc' },
-                { value: 'finished', label: 'Đã hoàn thành' },
+                { value: 'all', label: `Tất cả (${libraryStats.total})` },
+                { value: 'reading', label: `Đang đọc (${libraryStats.readingCount})` },
+                { value: 'finished', label: `Đã hoàn thành (${libraryStats.finishedCount})` },
               ] as const
             ).map((tab) => {
               const active = statusFilter === tab.value;
@@ -276,10 +338,10 @@ export const LibraryScreen: React.FC<LibraryScreenProps> = ({
                   type="button"
                   aria-pressed={active}
                   onClick={() => setStatusFilter(tab.value)}
-                  className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors cursor-pointer ${
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
                     active
-                      ? 'bg-white text-[#1E2024] shadow-xs'
-                      : 'text-[#525866] hover:text-[#1E2024]'
+                      ? 'bg-white text-[#18181B] font-semibold shadow-2xs'
+                      : 'text-[#52525B] hover:text-[#18181B]'
                   }`}
                 >
                   {tab.label}
@@ -289,7 +351,11 @@ export const LibraryScreen: React.FC<LibraryScreenProps> = ({
           </div>
         </div>
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-3">
+          <span className="hidden xl:inline-flex items-center gap-1.5 text-xs text-[#71717A]">
+            <UploadCloud className="w-3.5 h-3.5" />
+            Kéo thả tệp .pdf vào bất kỳ đâu hoặc
+          </span>
           <input
             ref={fileInputRef}
             type="file"
@@ -302,6 +368,7 @@ export const LibraryScreen: React.FC<LibraryScreenProps> = ({
           <Button
             variant="primary"
             loading={importing}
+            leftIcon={<FolderPlus className="w-4 h-4" />}
             onClick={() => fileInputRef.current?.click()}
           >
             Nhập sách PDF
@@ -322,26 +389,27 @@ export const LibraryScreen: React.FC<LibraryScreenProps> = ({
         <div
           role="status"
           aria-live="polite"
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"
         >
           {[1, 2, 3].map((item) => (
             <div
               key={item}
-              className="h-56 rounded-xl border border-[#E2DFD7] bg-white p-5 animate-pulse flex flex-col justify-between"
+              className="h-60 rounded-2xl border border-[#E4E1DA] bg-white p-5 animate-pulse flex flex-col justify-between"
             >
               <div className="space-y-3">
-                <div className="h-5 w-3/4 rounded bg-[#F1EFEA]" />
-                <div className="h-4 w-1/2 rounded bg-[#F1EFEA]" />
+                <div className="h-5 w-3/4 rounded-lg bg-[#EFECE6]" />
+                <div className="h-4 w-1/2 rounded-lg bg-[#EFECE6]" />
               </div>
-              <div className="h-9 w-full rounded bg-[#F1EFEA]" />
+              <div className="h-10 w-full rounded-xl bg-[#EFECE6]" />
             </div>
           ))}
         </div>
       ) : visibleBooks.length === 0 ? (
         <EmptyState
           testId="library-empty-state"
+          icon={<BookOpen className="w-6 h-6" />}
           title="Chưa có cuốn sách nào trong thư viện"
-          description="Hãy nhập tệp PDF tiếng Anh từ máy tính của bạn để bắt đầu đọc, tra nghĩa theo ngữ cảnh và lưu từ vựng."
+          description="Hãy nhập tệp PDF tiếng Anh từ máy tính của bạn (hoặc kéo thả tệp .pdf trực tiếp vào cửa sổ này) để bắt đầu đọc, tra nghĩa theo ngữ cảnh và lưu từ vựng."
           actionLabel="Nhập sách PDF"
           onAction={() => fileInputRef.current?.click()}
         />
@@ -350,7 +418,7 @@ export const LibraryScreen: React.FC<LibraryScreenProps> = ({
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"
           data-testid="library-book-grid"
         >
-          {visibleBooks.map((book) => {
+          {visibleBooks.map((book, idx) => {
             const safePageCount = Math.max(1, book.pageCount);
             const progressPercent = Math.min(
               100,
@@ -358,40 +426,67 @@ export const LibraryScreen: React.FC<LibraryScreenProps> = ({
             );
             const termCount = book.uniqueTermCount ?? book.highlightCount ?? 0;
             const dueCount = book.dueCardCount ?? 0;
+            const spineGradient = BOOK_ACCENT_PALETTES[idx % BOOK_ACCENT_PALETTES.length];
 
             return (
               <article
                 key={book.id}
                 data-testid={`book-card-${book.id}`}
-                className="flex flex-col justify-between rounded-xl border border-[#E2DFD7] bg-white p-5 shadow-xs transition-shadow hover:shadow-md"
+                className="group relative flex flex-col justify-between rounded-2xl border border-[#E4E1DA] bg-white p-5 shadow-2xs transition-all duration-200 hover:shadow-md hover:border-[#3F51B5]/35"
               >
-                <div className="space-y-3">
-                  <div className="flex items-start justify-between gap-2">
-                    <h2 className="text-base font-semibold text-[#1E2024] line-clamp-2 leading-snug">
-                      {book.title}
-                    </h2>
-                    <div className="flex items-center gap-1.5 shrink-0">
-                      {book.isScanOnly && <Badge variant="amber">Bản quét (Scan)</Badge>}
-                      <button
-                        type="button"
-                        onClick={() => void handleToggleBookStatus(book)}
-                        title="Nhấn để đổi trạng thái đọc"
-                        className="cursor-pointer"
-                      >
-                        <Badge variant={book.status === 'finished' ? 'green' : 'indigo'}>
-                          {book.status === 'finished' ? 'Đã hoàn thành' : 'Đang đọc'}
-                        </Badge>
-                      </button>
+                <div className="space-y-4">
+                  {/* Top Book Cover Miniature + Title */}
+                  <div className="flex items-start gap-3.5">
+                    <div
+                      onClick={() => onOpenBook(book.id)}
+                      className={`w-11 h-14 rounded-lg bg-gradient-to-br ${spineGradient} text-white flex flex-col items-center justify-center shrink-0 shadow-xs cursor-pointer group-hover:scale-[1.03] transition-transform`}
+                    >
+                      <FileText className="w-5 h-5 opacity-90" />
+                      <span className="text-[9px] font-bold tracking-wider uppercase mt-0.5 opacity-80">
+                        PDF
+                      </span>
+                    </div>
+
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-2">
+                        <h2
+                          onClick={() => onOpenBook(book.id)}
+                          className="text-base font-semibold text-[#18181B] line-clamp-2 leading-snug cursor-pointer group-hover:text-[#3F51B5] transition-colors"
+                        >
+                          {book.title}
+                        </h2>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
+                        {book.isScanOnly && <Badge variant="amber">Bản quét (Scan)</Badge>}
+                        <button
+                          type="button"
+                          onClick={() => void handleToggleBookStatus(book)}
+                          title="Nhấn để đổi trạng thái đọc"
+                          className="cursor-pointer"
+                        >
+                          <Badge variant={book.status === 'finished' ? 'green' : 'indigo'}>
+                            {book.status === 'finished' ? (
+                              <>
+                                <CheckCircle2 className="w-3 h-3" />
+                                Đã hoàn thành
+                              </>
+                            ) : (
+                              'Đang đọc'
+                            )}
+                          </Badge>
+                        </button>
+                      </div>
                     </div>
                   </div>
 
                   {/* Reading Progress */}
-                  <div className="space-y-1.5">
-                    <div className="flex items-center justify-between text-xs text-[#525866]">
+                  <div className="space-y-1.5 bg-[#FAF9F6] p-3 rounded-xl border border-[#E4E1DA]/70">
+                    <div className="flex items-center justify-between text-xs text-[#52525B]">
                       <span>
-                        Trang {book.lastPage} / {book.pageCount}
+                        Trang <strong className="text-[#18181B]">{book.lastPage}</strong> /{' '}
+                        {book.pageCount}
                       </span>
-                      <span className="font-medium text-[#1E2024]">{progressPercent}%</span>
+                      <span className="font-semibold text-[#3F51B5]">{progressPercent}%</span>
                     </div>
                     <div
                       role="progressbar"
@@ -399,29 +494,34 @@ export const LibraryScreen: React.FC<LibraryScreenProps> = ({
                       aria-valuenow={progressPercent}
                       aria-valuemin={0}
                       aria-valuemax={100}
-                      className="h-2 w-full overflow-hidden rounded-full bg-[#F1EFEA]"
+                      className="h-1.5 w-full overflow-hidden rounded-full bg-[#E4E1DA]"
                     >
                       <div
-                        className="h-full bg-[#3F51B5] transition-all"
+                        className="h-full bg-[#3F51B5] rounded-full transition-all duration-300"
                         style={{ width: `${progressPercent}%` }}
                       />
                     </div>
                   </div>
 
                   {/* Vocabulary & Due counts */}
-                  <div className="flex flex-wrap items-center gap-2 pt-1">
-                    <Badge variant="amber">{termCount} từ vựng</Badge>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Badge variant="amber">
+                      <BookMarked className="w-3 h-3" />
+                      {termCount} từ vựng
+                    </Badge>
                     <Badge variant={dueCount > 0 ? 'indigo' : 'neutral'}>
+                      <Sparkles className="w-3 h-3" />
                       {dueCount} thẻ cần ôn
                     </Badge>
                   </div>
                 </div>
 
                 {/* Actions */}
-                <div className="mt-5 pt-4 border-t border-[#E2DFD7] space-y-2.5">
+                <div className="mt-5 pt-4 border-t border-[#E4E1DA]/80 space-y-2.5">
                   <Button
                     variant="primary"
                     className="w-full"
+                    leftIcon={<BookOpen className="w-4 h-4" />}
                     onClick={() => onOpenBook(book.id)}
                   >
                     Tiếp tục đọc
@@ -430,6 +530,7 @@ export const LibraryScreen: React.FC<LibraryScreenProps> = ({
                     <Button
                       variant="secondary"
                       size="sm"
+                      leftIcon={<BookMarked className="w-3.5 h-3.5" />}
                       onClick={() => onOpenVocabularyForBook(book.id)}
                     >
                       Xem từ vựng
@@ -438,6 +539,7 @@ export const LibraryScreen: React.FC<LibraryScreenProps> = ({
                       <Button
                         variant="ghost"
                         size="sm"
+                        leftIcon={<Edit3 className="w-3.5 h-3.5" />}
                         onClick={() => handleOpenRenameModal(book)}
                       >
                         Đổi tên
@@ -445,7 +547,8 @@ export const LibraryScreen: React.FC<LibraryScreenProps> = ({
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="text-[#DC2626] hover:text-[#B91C1C]"
+                        leftIcon={<Trash2 className="w-3.5 h-3.5" />}
+                        className="text-[#DC2626] hover:text-[#B91C1C] hover:bg-red-50"
                         onClick={() => handleOpenDeleteModal(book)}
                       >
                         Xóa sách
@@ -485,13 +588,13 @@ export const LibraryScreen: React.FC<LibraryScreenProps> = ({
         }
       >
         {pendingDuplicate && (
-          <div className="space-y-2">
+          <div className="space-y-2.5">
             <p>
               Tệp PDF <strong>{pendingDuplicate.fileName}</strong> có mã băm SHA-256 trùng khớp với
               cuốn sách đã có trong thư viện:{' '}
               <strong>{pendingDuplicate.existingBook.title}</strong>.
             </p>
-            <p className="text-[#525866]">
+            <p className="text-[#52525B]">
               Bạn muốn mở ngay cuốn sách hiện có (giữ nguyên trang đang đọc và từ vựng đã lưu) hay
               nhập thành một bản sao độc lập?
             </p>
@@ -516,7 +619,7 @@ export const LibraryScreen: React.FC<LibraryScreenProps> = ({
         }
       >
         <form onSubmit={(e) => void handleConfirmRename(e)} className="space-y-3">
-          <label htmlFor="rename-book-input" className="block text-xs font-medium text-[#525866]">
+          <label htmlFor="rename-book-input" className="block text-xs font-medium text-[#52525B]">
             Tiêu đề hiển thị trong thư viện
           </label>
           <input
@@ -525,7 +628,7 @@ export const LibraryScreen: React.FC<LibraryScreenProps> = ({
             aria-label="Tên sách mới"
             value={renameValue}
             onChange={(e) => setRenameValue(e.target.value)}
-            className="w-full rounded-lg border border-[#E2DFD7] bg-white px-3.5 py-2 text-sm text-[#1E2024] focus:border-[#3F51B5]"
+            className="w-full rounded-xl border border-[#E4E1DA] bg-white px-3.5 py-2.5 text-sm text-[#18181B] focus:border-[#3F51B5]"
           />
         </form>
       </Modal>
@@ -552,15 +655,15 @@ export const LibraryScreen: React.FC<LibraryScreenProps> = ({
               Bạn sắp xóa cuốn sách <strong>{deletingBook.title}</strong> khỏi thư viện. Vui lòng
               chọn cách xử lý dữ liệu liên quan:
             </p>
-            <div className="space-y-2.5 rounded-lg bg-[#F8F6F1] p-3.5 border border-[#E2DFD7]">
+            <div className="space-y-3 rounded-xl bg-[#FAF9F6] p-4 border border-[#E4E1DA]">
               <label className="flex items-start gap-2.5 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={deleteManagedFile}
                   onChange={(e) => setDeleteManagedFile(e.target.checked)}
-                  className="mt-0.5 rounded border-[#E2DFD7]"
+                  className="mt-0.5 rounded border-[#E4E1DA]"
                 />
-                <span className="text-sm text-[#1E2024]">
+                <span className="text-sm text-[#18181B]">
                   Xóa tệp PDF khỏi thư mục ứng dụng
                 </span>
               </label>
@@ -569,9 +672,9 @@ export const LibraryScreen: React.FC<LibraryScreenProps> = ({
                   type="checkbox"
                   checked={deleteRetainedVocabulary}
                   onChange={(e) => setDeleteRetainedVocabulary(e.target.checked)}
-                  className="mt-0.5 rounded border-[#E2DFD7]"
+                  className="mt-0.5 rounded border-[#E4E1DA]"
                 />
-                <span className="text-sm text-[#1E2024]">
+                <span className="text-sm text-[#18181B]">
                   Xóa luôn từ vựng đã lưu từ sách này
                 </span>
               </label>

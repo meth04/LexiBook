@@ -1,4 +1,5 @@
 import React, { useEffect, useId } from 'react';
+import { AlertCircle, CheckCircle2, Info, Sparkles, X } from 'lucide-react';
 
 export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
 export type ButtonSize = 'sm' | 'md' | 'lg';
@@ -12,19 +13,19 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 
 const BUTTON_VARIANT_CLASSES: Record<ButtonVariant, string> = {
   primary:
-    'bg-[#3F51B5] text-white hover:bg-[#303F9F] active:bg-[#283593] border border-transparent shadow-xs',
+    'bg-[#3F51B5] text-white hover:bg-[#32408F] active:bg-[#283593] border border-transparent shadow-xs',
   secondary:
-    'bg-white text-[#1E2024] hover:bg-[#F1EFEA] active:bg-[#E2DFD7] border border-[#E2DFD7]',
+    'bg-white text-[#18181B] hover:bg-[#F5F3EE] active:bg-[#EAE6DF] border border-[#E4E1DA] shadow-2xs',
   ghost:
-    'bg-transparent text-[#525866] hover:bg-[#F1EFEA] hover:text-[#1E2024] border border-transparent',
+    'bg-transparent text-[#52525B] hover:bg-[#EFECE6] hover:text-[#18181B] border border-transparent',
   danger:
     'bg-[#DC2626] text-white hover:bg-[#B91C1C] active:bg-[#991B1B] border border-transparent shadow-xs',
 };
 
 const BUTTON_SIZE_CLASSES: Record<ButtonSize, string> = {
-  sm: 'px-2.5 py-1 text-xs rounded-md gap-1.5',
-  md: 'px-3.5 py-2 text-sm rounded-md gap-2',
-  lg: 'px-5 py-2.5 text-base rounded-lg gap-2.5',
+  sm: 'px-2.5 py-1.5 text-xs rounded-lg gap-1.5',
+  md: 'px-3.5 py-2 text-sm rounded-lg gap-2',
+  lg: 'px-5 py-2.5 text-sm font-semibold rounded-xl gap-2.5',
 };
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
@@ -50,7 +51,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         type={type}
         disabled={isDisabled}
         aria-busy={loading || undefined}
-        className={`inline-flex items-center justify-center font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#3F51B5] disabled:opacity-55 disabled:pointer-events-none cursor-pointer ${BUTTON_VARIANT_CLASSES[variant]} ${BUTTON_SIZE_CLASSES[size]} ${className}`}
+        className={`inline-flex items-center justify-center font-medium transition-all duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#3F51B5] disabled:opacity-50 disabled:pointer-events-none cursor-pointer select-none ${BUTTON_VARIANT_CLASSES[variant]} ${BUTTON_SIZE_CLASSES[size]} ${className}`}
         {...rest}
       >
         {loading ? (
@@ -76,11 +77,11 @@ export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
 }
 
 const BADGE_VARIANT_CLASSES: Record<BadgeVariant, string> = {
-  neutral: 'bg-[#F1EFEA] text-[#525866] border-[#E2DFD7]',
-  amber: 'bg-[#FEF3C7] text-[#92400E] border-[#F59E0B]/40',
-  indigo: 'bg-[#E8EAF6] text-[#283593] border-[#3F51B5]/30',
-  green: 'bg-[#DCFCE7] text-[#15803D] border-[#15803D]/30',
-  danger: 'bg-[#FEE2E2] text-[#B91C1C] border-[#DC2626]/30',
+  neutral: 'bg-[#F3F1EC] text-[#52525B] border-[#E4E1DA]',
+  amber: 'bg-[#FEF3C7]/90 text-[#92400E] border-[#F59E0B]/35',
+  indigo: 'bg-[#EEF2FF] text-[#3730A3] border-[#6366F1]/25',
+  green: 'bg-[#DCFCE7]/90 text-[#166534] border-[#22C55E]/30',
+  danger: 'bg-[#FEE2E2] text-[#991B1B] border-[#EF4444]/30',
 };
 
 export const Badge: React.FC<BadgeProps> = ({
@@ -91,7 +92,7 @@ export const Badge: React.FC<BadgeProps> = ({
 }) => {
   return (
     <span
-      className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium border ${BADGE_VARIANT_CLASSES[variant]} ${className}`}
+      className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium border ${BADGE_VARIANT_CLASSES[variant]} ${className}`}
       {...rest}
     >
       {children}
@@ -142,7 +143,7 @@ export const Modal: React.FC<ModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-[2px] p-4"
       onClick={(e) => {
         if (e.target === e.currentTarget) {
           onClose();
@@ -153,24 +154,24 @@ export const Modal: React.FC<ModalProps> = ({
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className={`w-full ${MODAL_SIZE_CLASSES[size]} rounded-xl bg-white border border-[#E2DFD7] shadow-xl overflow-hidden text-[#1E2024]`}
+        className={`w-full ${MODAL_SIZE_CLASSES[size]} rounded-2xl bg-white border border-[#E4E1DA] shadow-2xl overflow-hidden text-[#18181B]`}
       >
-        <div className="flex items-center justify-between px-5 py-4 border-b border-[#E2DFD7]">
-          <h2 id={titleId} className="text-base font-semibold text-[#1E2024]">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#E4E1DA] bg-[#FAF9F6]">
+          <h2 id={titleId} className="text-base font-semibold text-[#18181B]">
             {title}
           </h2>
           <button
             type="button"
             onClick={onClose}
             aria-label={closeLabelVi}
-            className="rounded-md p-1.5 text-[#525866] hover:bg-[#F1EFEA] hover:text-[#1E2024] focus-visible:outline-2 focus-visible:outline-[#3F51B5]"
+            className="rounded-lg p-1.5 text-[#52525B] hover:bg-[#EFECE6] hover:text-[#18181B] transition-colors cursor-pointer"
           >
-            ✕
+            <X className="w-4 h-4" />
           </button>
         </div>
-        <div className="px-5 py-4 text-sm text-[#1E2024]">{children}</div>
+        <div className="px-6 py-5 text-sm text-[#18181B] leading-relaxed">{children}</div>
         {footer && (
-          <div className="flex items-center justify-end gap-2.5 px-5 py-3.5 bg-[#F8F6F1] border-t border-[#E2DFD7]">
+          <div className="flex items-center justify-end gap-2.5 px-6 py-3.5 bg-[#FAF9F6] border-t border-[#E4E1DA]">
             {footer}
           </div>
         )}
@@ -201,15 +202,23 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
   return (
     <div
       data-testid={testId}
-      className="flex flex-col items-center justify-center text-center rounded-xl border border-dashed border-[#E2DFD7] bg-white px-6 py-12"
+      className="flex flex-col items-center justify-center text-center rounded-2xl border border-dashed border-[#D6D2C8] bg-white/80 px-8 py-14 shadow-2xs"
     >
-      {icon && <div className="mb-3 text-[#525866]">{icon}</div>}
-      <h3 className="text-base font-semibold text-[#1E2024]">{title}</h3>
-      <p className="mt-1.5 max-w-md text-sm text-[#525866]">{description}</p>
+      {icon ? (
+        <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#EEF2FF] text-[#3F51B5]">
+          {icon}
+        </div>
+      ) : (
+        <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#F3F1EC] text-[#52525B]">
+          <Info className="w-6 h-6" />
+        </div>
+      )}
+      <h3 className="text-base font-semibold text-[#18181B]">{title}</h3>
+      <p className="mt-1.5 max-w-md text-sm text-[#52525B] leading-relaxed">{description}</p>
       {(actionLabel && onAction) || secondaryAction ? (
-        <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
           {actionLabel && onAction && (
-            <Button variant="primary" onClick={onAction}>
+            <Button variant="primary" size="md" onClick={onAction}>
               {actionLabel}
             </Button>
           )}
@@ -238,11 +247,14 @@ export const ErrorBanner: React.FC<ErrorBannerProps> = ({
   return (
     <div
       role="alert"
-      className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-[#DC2626]/30 bg-[#FEF2F2] px-4 py-3 text-sm text-[#991B1B]"
+      className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#EF4444]/30 bg-[#FEF2F2] px-4 py-3 text-sm text-[#991B1B] shadow-2xs"
     >
-      <div className="flex-1 min-w-[220px]">
-        <p className="font-medium">{messageVi}</p>
-        {details && <p className="mt-0.5 text-xs text-[#B91C1C]">{details}</p>}
+      <div className="flex items-start gap-2.5 flex-1 min-w-[220px]">
+        <AlertCircle className="w-4 h-4 text-[#DC2626] shrink-0 mt-0.5" />
+        <div>
+          <p className="font-medium">{messageVi}</p>
+          {details && <p className="mt-0.5 text-xs text-[#B91C1C]">{details}</p>}
+        </div>
       </div>
       <div className="flex items-center gap-2">
         {onRetry && (
@@ -273,23 +285,39 @@ export const OnboardingBanner: React.FC<OnboardingBannerProps> = ({
     <section
       aria-label="Giới thiệu quyền riêng tư và hướng dẫn bắt đầu"
       data-testid="onboarding-banner"
-      className="rounded-xl border border-[#3F51B5]/25 bg-white p-5 shadow-xs"
+      className="rounded-2xl border border-[#3F51B5]/20 bg-gradient-to-r from-[#EEF2FF]/70 via-white to-[#FEF3C7]/35 p-5 shadow-xs"
     >
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-        <div className="space-y-1.5">
-          <div className="flex items-center gap-2">
-            <Badge variant="indigo">Ưu tiên cục bộ (Local-first)</Badge>
-            <h2 className="text-base font-semibold text-[#1E2024]">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
+        <div className="space-y-2">
+          <div className="flex flex-wrap items-center gap-2.5">
+            <Badge variant="indigo">
+              <Sparkles className="w-3 h-3" />
+              Ưu tiên cục bộ (Local-first)
+            </Badge>
+            <h2 className="text-base font-semibold text-[#18181B]">
               Chào mừng bạn đến với LexiBook AI
             </h2>
           </div>
-          <p className="text-sm text-[#525866] leading-relaxed">
+          <p className="text-sm text-[#52525B] leading-relaxed max-w-3xl">
             Sách PDF, đánh dấu trang (highlight), từ vựng và lịch ôn tập FSRS được lưu trữ{' '}
-            <strong className="text-[#1E2024]">100% cục bộ trên máy tính (PC)</strong> của bạn. Chỉ
+            <strong className="text-[#18181B]">100% cục bộ trên máy tính (PC)</strong> của bạn. Chỉ
             khi bạn xác nhận tra cứu từ vựng, đoạn trích ngắn tối thiểu mới được gửi tới Google
-            Gemini bằng khóa API cá nhân. Bạn có thể bỏ qua thiết lập khóa API để nhập sách và đọc
-            ngoại tuyến ngay lập tức.
+            Gemini bằng khóa API cá nhân. Bạn có thể đọc sách và đánh dấu ngoại tuyến ngay lập tức.
           </p>
+          <div className="flex flex-wrap items-center gap-4 pt-1 text-xs text-[#52525B]">
+            <span className="inline-flex items-center gap-1.5 font-medium text-[#18181B]">
+              <CheckCircle2 className="w-3.5 h-3.5 text-[#15803D]" />
+              1. Nhập sách PDF tiếng Anh
+            </span>
+            <span className="inline-flex items-center gap-1.5 font-medium text-[#18181B]">
+              <CheckCircle2 className="w-3.5 h-3.5 text-[#3F51B5]" />
+              2. Bôi đen cụm từ trên trang để dịch ngữ cảnh
+            </span>
+            <span className="inline-flex items-center gap-1.5 font-medium text-[#18181B]">
+              <CheckCircle2 className="w-3.5 h-3.5 text-[#D97706]" />
+              3. Đưa từ quan trọng vào lịch ôn tập FSRS
+            </span>
+          </div>
         </div>
         <div className="flex flex-wrap items-center gap-2.5 shrink-0">
           {onOpenSettings && (

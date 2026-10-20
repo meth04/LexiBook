@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Eye, EyeOff, KeyRound, ShieldCheck } from 'lucide-react';
 import { lexiBookClient } from '../../shared/api/client';
 import type {
   AiKeyStatus,
@@ -37,6 +38,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
     cacheEntryCount: 0,
   });
   const [apiKeyInput, setApiKeyInput] = useState('');
+  const [showKeyText, setShowKeyText] = useState(false);
   const [selectedModel, setSelectedModel] = useState('gemma-4-31b-it');
   const [aiFeedbackVi, setAiFeedbackVi] = useState<string | null>(null);
   const [aiErrorVi, setAiErrorVi] = useState<string | null>(null);
@@ -261,68 +263,93 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   };
 
   return (
-    <div className="mx-auto max-w-4xl space-y-8 p-6 text-slate-900" data-testid="settings-screen">
-      <header className="border-b border-slate-200 pb-4">
-        <h1 className="text-2xl font-semibold tracking-tight">Cài đặt hệ thống &amp; Quyền riêng tư</h1>
-        <p className="mt-1 text-sm text-slate-600">
-          Quản lý khóa Gemini BYOK, chế độ đọc PDF, lịch ôn tập FSRS, thông báo Windows và sao lưu cục bộ.
+    <div className="mx-auto max-w-4xl space-y-6 text-[#18181B]" data-testid="settings-screen">
+      <header className="bg-white border border-[#E4E1DA] rounded-2xl p-6 shadow-2xs">
+        <h1 className="text-xl font-bold tracking-tight text-[#18181B]">
+          Cài đặt hệ thống &amp; Quyền riêng tư
+        </h1>
+        <p className="mt-1 text-sm text-[#52525B]">
+          Quản lý khóa Google AI Studio / Gemini BYOK, chế độ đọc PDF, lịch ôn tập FSRS, thông báo
+          Windows và sao lưu cục bộ.
         </p>
       </header>
 
       {/* Section 1: Khóa API Gemini (BYOK) & Quyền riêng tư */}
       <section
         aria-labelledby="settings-ai-heading"
-        className="rounded-xl border border-slate-200 bg-white p-6 shadow-xs"
+        className="rounded-2xl border border-[#E4E1DA] bg-white p-6 shadow-2xs"
       >
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <h2 id="settings-ai-heading" className="text-lg font-semibold text-slate-900">
-            1. Khóa API Gemini (BYOK) &amp; Quyền riêng tư
-          </h2>
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-[#EEF2FF] text-[#3F51B5] flex items-center justify-center">
+              <KeyRound className="w-4 h-4" />
+            </div>
+            <h2 id="settings-ai-heading" className="text-base font-bold text-[#18181B]">
+              1. Khóa API Gemini (BYOK) &amp; Quyền riêng tư
+            </h2>
+          </div>
           <span
             data-testid="ai-key-status-badge"
-            className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${
+            className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium ${
               aiStatus.hasKey
-                ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
-                : 'bg-amber-50 text-amber-800 border border-amber-200'
+                ? 'bg-[#DCFCE7] text-[#166534] border border-[#22C55E]/30'
+                : 'bg-[#FEF3C7] text-[#92400E] border border-[#F59E0B]/35'
             }`}
           >
+            <ShieldCheck className="w-3.5 h-3.5" />
             {aiStatus.hasKey
               ? 'Đã lưu khóa bảo mật trong Windows Credential Manager'
               : 'Chưa cấu hình khóa API'}
           </span>
         </div>
 
-        <div className="mt-3 rounded-lg bg-slate-50 p-3 text-xs text-slate-700">
-          <strong>Cam kết quyền riêng tư:</strong> Toàn bộ tệp sách PDF, đánh dấu và lịch sử ôn tập luôn
-          được lưu trữ cục bộ trên máy tính của bạn. Chỉ câu văn và đoạn văn ngắn xung quanh từ được bạn
-          xác nhận đánh dấu mới được gửi tới Google Gemini để phân tích ngữ cảnh. Khóa API không bao giờ
-          lưu trong cơ sở dữ liệu SQLite hay bản sao lưu.
+        <div className="mt-4 rounded-xl bg-[#FAF9F6] border border-[#E4E1DA] p-3.5 text-xs text-[#52525B] leading-relaxed">
+          <strong className="text-[#18181B]">Cam kết quyền riêng tư:</strong> Toàn bộ tệp sách PDF,
+          đánh dấu và lịch sử ôn tập luôn được lưu trữ cục bộ trên máy tính của bạn. Chỉ câu văn và
+          đoạn văn ngắn xung quanh từ được bạn xác nhận đánh dấu mới được gửi tới Google Gemini để
+          phân tích ngữ cảnh. Khóa API không bao giờ lưu trong cơ sở dữ liệu SQLite hay bản sao lưu.
         </div>
 
-        <form onSubmit={handleSaveApiKey} className="mt-4 space-y-4">
+        <form onSubmit={handleSaveApiKey} className="mt-5 space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label htmlFor="gemini-api-key-input" className="block text-sm font-medium text-slate-700">
+              <label
+                htmlFor="gemini-api-key-input"
+                className="block text-xs font-semibold text-[#18181B] mb-1.5"
+              >
                 Khóa Google Gemini API
               </label>
-              <input
-                id="gemini-api-key-input"
-                type="password"
-                autoComplete="off"
-                value={apiKeyInput}
-                onChange={(e) => setApiKeyInput(e.target.value)}
-                placeholder={
-                  aiStatus.hasKey
-                    ? '•••••••••••••••• (Nhập mới để thay thế hoặc để trống khi chỉ đổi mô hình)'
-                    : 'Nhập khóa AIza... hoặc AQ....'
-                }
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
-              />
+              <div className="relative">
+                <input
+                  id="gemini-api-key-input"
+                  type={showKeyText ? 'text' : 'password'}
+                  autoComplete="off"
+                  value={apiKeyInput}
+                  onChange={(e) => setApiKeyInput(e.target.value)}
+                  placeholder={
+                    aiStatus.hasKey
+                      ? '•••••••••••••••• (Nhập mới để thay thế hoặc để trống khi chỉ đổi mô hình)'
+                      : 'Nhập khóa từ Google AI Studio...'
+                  }
+                  className="w-full rounded-xl border border-[#D6D2C8] bg-[#FAF9F6] pl-3.5 pr-9 py-2 text-sm focus:bg-white focus:border-[#3F51B5]"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowKeyText((v) => !v)}
+                  aria-label={showKeyText ? 'Ẩn khóa API' : 'Hiện khóa API'}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#71717A] hover:text-[#18181B] cursor-pointer"
+                >
+                  {showKeyText ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
             </div>
 
             <div>
-              <label htmlFor="gemini-model-select" className="block text-sm font-medium text-slate-700">
-                Mô hình Gemini hỗ trợ
+              <label
+                htmlFor="gemini-model-select"
+                className="block text-xs font-semibold text-[#18181B] mb-1.5"
+              >
+                Mô hình Gemini / Gemma hỗ trợ
               </label>
               <select
                 id="gemini-model-select"
@@ -339,7 +366,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                     });
                   }
                 }}
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                className="w-full rounded-xl border border-[#D6D2C8] bg-[#FAF9F6] px-3.5 py-2 text-sm text-[#18181B]"
               >
                 {(aiStatus.supportedModels.length > 0
                   ? aiStatus.supportedModels
@@ -353,11 +380,11 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2.5">
             <button
               type="submit"
               disabled={isBusyAi}
-              className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+              className="rounded-xl bg-[#3F51B5] px-4 py-2 text-xs font-semibold text-white hover:bg-[#32408F] disabled:opacity-50 cursor-pointer"
             >
               Lưu khóa API
             </button>
@@ -365,7 +392,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
               type="button"
               disabled={isBusyAi}
               onClick={handleTestAiConnection}
-              className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+              className="rounded-xl border border-[#E4E1DA] bg-white px-4 py-2 text-xs font-medium text-[#18181B] hover:bg-[#F3F1EC] disabled:opacity-50 cursor-pointer"
             >
               Kiểm tra kết nối
             </button>
@@ -373,14 +400,14 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
               type="button"
               disabled={isBusyAi}
               onClick={handleDeleteAiKey}
-              className="rounded-lg border border-rose-300 bg-rose-50 px-4 py-2 text-sm font-medium text-rose-700 hover:bg-rose-100 disabled:opacity-50"
+              className="rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-xs font-medium text-red-700 hover:bg-red-100 disabled:opacity-50 cursor-pointer"
             >
               Xóa khóa API
             </button>
             <button
               type="button"
               onClick={handleClearAiCache}
-              className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+              className="rounded-xl border border-[#E4E1DA] bg-white px-4 py-2 text-xs font-medium text-[#52525B] hover:bg-[#F3F1EC] cursor-pointer"
             >
               Xóa bộ nhớ đệm AI ({aiStatus.cacheEntryCount} mục)
             </button>
@@ -388,12 +415,12 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
         </form>
 
         {aiFeedbackVi && (
-          <p role="status" className="mt-3 text-sm font-medium text-emerald-700">
+          <p role="status" className="mt-3 text-xs font-semibold text-[#15803D]">
             {aiFeedbackVi}
           </p>
         )}
         {aiErrorVi && (
-          <p role="alert" className="mt-3 text-sm font-medium text-rose-700">
+          <p role="alert" className="mt-3 text-xs font-semibold text-[#DC2626]">
             {aiErrorVi}
           </p>
         )}
@@ -402,15 +429,18 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
       {/* Section 2: Cài đặt Đọc sách & Ôn tập (FSRS) */}
       <section
         aria-labelledby="settings-reading-study-heading"
-        className="rounded-xl border border-slate-200 bg-white p-6 shadow-xs"
+        className="rounded-2xl border border-[#E4E1DA] bg-white p-6 shadow-2xs"
       >
-        <h2 id="settings-reading-study-heading" className="text-lg font-semibold text-slate-900">
+        <h2 id="settings-reading-study-heading" className="text-base font-bold text-[#18181B]">
           2. Cài đặt Đọc sách &amp; Ôn tập (FSRS)
         </h2>
 
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
           <div>
-            <label htmlFor="settings-theme-select" className="block text-sm font-medium text-slate-700">
+            <label
+              htmlFor="settings-theme-select"
+              className="block text-xs font-semibold text-[#18181B] mb-1.5"
+            >
               Giao diện đọc sách
             </label>
             <select
@@ -419,7 +449,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
               onChange={(e) =>
                 void handleUpdateSettings({ theme: e.target.value as AppSettings['theme'] })
               }
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              className="w-full rounded-xl border border-[#D6D2C8] bg-[#FAF9F6] px-3.5 py-2 text-sm"
             >
               <option value="light">Sáng ấm áp</option>
               <option value="dark">Tối dịu mắt</option>
@@ -427,7 +457,10 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
           </div>
 
           <div>
-            <label htmlFor="settings-pdf-scale" className="block text-sm font-medium text-slate-700">
+            <label
+              htmlFor="settings-pdf-scale"
+              className="block text-xs font-semibold text-[#18181B] mb-1.5"
+            >
               Tỷ lệ thu phóng PDF mặc định
             </label>
             <select
@@ -436,7 +469,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
               onChange={(e) =>
                 void handleUpdateSettings({ defaultPdfScale: Number(e.target.value) })
               }
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              className="w-full rounded-xl border border-[#D6D2C8] bg-[#FAF9F6] px-3.5 py-2 text-sm"
             >
               <option value="0.75">75%</option>
               <option value="1">100%</option>
@@ -446,7 +479,10 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
           </div>
 
           <div>
-            <label htmlFor="settings-daily-new-limit" className="block text-sm font-medium text-slate-700">
+            <label
+              htmlFor="settings-daily-new-limit"
+              className="block text-xs font-semibold text-[#18181B] mb-1.5"
+            >
               Số thẻ mới tối đa mỗi ngày
             </label>
             <input
@@ -460,14 +496,14 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                   dailyNewLimit: Math.max(1, Number(e.target.value) || 10),
                 })
               }
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              className="w-full rounded-xl border border-[#D6D2C8] bg-[#FAF9F6] px-3.5 py-2 text-sm"
             />
           </div>
 
           <div>
             <label
               htmlFor="settings-daily-review-limit"
-              className="block text-sm font-medium text-slate-700"
+              className="block text-xs font-semibold text-[#18181B] mb-1.5"
             >
               Số lượt ôn tối đa mỗi ngày
             </label>
@@ -482,37 +518,37 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                   dailyReviewLimit: Math.max(1, Number(e.target.value) || 50),
                 })
               }
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              className="w-full rounded-xl border border-[#D6D2C8] bg-[#FAF9F6] px-3.5 py-2 text-sm"
             />
           </div>
         </div>
 
-        <div className="mt-4 space-y-2">
-          <label className="flex items-center gap-2 text-sm text-slate-700">
+        <div className="mt-4 space-y-2.5">
+          <label className="flex items-center gap-2.5 text-sm text-[#18181B] cursor-pointer">
             <input
               type="checkbox"
               checked={appSettings.autoAnalyzeOnHighlight}
               onChange={(e) =>
                 void handleUpdateSettings({ autoAnalyzeOnHighlight: e.target.checked })
               }
-              className="rounded border-slate-300"
+              className="rounded border-[#D6D2C8]"
             />
             <span>Tự động phân tích AI sau khi xác nhận đánh dấu</span>
           </label>
 
-          <label className="flex items-center gap-2 text-sm text-slate-700">
+          <label className="flex items-center gap-2.5 text-sm text-[#18181B] cursor-pointer">
             <input
               type="checkbox"
               checked={appSettings.autoAddToStudy}
               onChange={(e) => void handleUpdateSettings({ autoAddToStudy: e.target.checked })}
-              className="rounded border-slate-300"
+              className="rounded border-[#D6D2C8]"
             />
             <span>Tự động thêm vào danh sách Ôn tập</span>
           </label>
         </div>
 
         {settingsFeedbackVi && (
-          <p role="status" className="mt-3 text-sm font-medium text-emerald-700">
+          <p role="status" className="mt-3 text-xs font-semibold text-[#15803D]">
             {settingsFeedbackVi}
           </p>
         )}
@@ -521,49 +557,49 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
       {/* Section 3: Nhắc nhở Ôn tập trên Windows (Opt-in) */}
       <section
         aria-labelledby="settings-reminders-heading"
-        className="rounded-xl border border-slate-200 bg-white p-6 shadow-xs"
+        className="rounded-2xl border border-[#E4E1DA] bg-white p-6 shadow-2xs"
       >
-        <h2 id="settings-reminders-heading" className="text-lg font-semibold text-slate-900">
+        <h2 id="settings-reminders-heading" className="text-base font-bold text-[#18181B]">
           3. Nhắc nhở Ôn tập trên Windows (Opt-in)
         </h2>
 
         <div
           data-testid="windows-reminder-disclosure"
-          className="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900"
+          className="mt-3 rounded-xl border border-[#F59E0B]/35 bg-[#FEF3C7]/60 p-3.5 text-xs text-[#92400E]"
         >
-          Lưu ý: Nhắc nhở hoạt động khi ứng dụng đang mở hoặc thu nhỏ xuống khay hệ thống (System Tray).
-          Khi thoát hoàn toàn ứng dụng (Quit), bộ hẹn giờ nền sẽ dừng trừ khi bạn bật khởi động cùng
-          Windows.
+          Lưu ý: Nhắc nhở hoạt động khi ứng dụng đang mở hoặc thu nhỏ xuống khay hệ thống (System
+          Tray). Khi thoát hoàn toàn ứng dụng (Quit), bộ hẹn giờ nền sẽ dừng trừ khi bạn bật khởi
+          động cùng Windows.
         </div>
 
         {reminderConfig.permissionState === 'denied' && (
           <div
             role="alert"
             data-testid="reminder-permission-denied-banner"
-            className="mt-3 rounded-lg border border-rose-200 bg-rose-50 p-3 text-xs text-rose-900"
+            className="mt-3 rounded-xl border border-red-200 bg-red-50 p-3.5 text-xs text-red-900"
           >
-            Quyền thông báo Windows đang bị từ chối. Huy hiệu (badge) báo số thẻ đến hạn trong ứng dụng
-            vẫn hoạt động ngoại tuyến bình thường mà không cần quyền thông báo hệ điều hành.
+            Quyền thông báo Windows đang bị từ chối. Huy hiệu (badge) báo số thẻ đến hạn trong ứng
+            dụng vẫn hoạt động ngoại tuyến bình thường mà không cần quyền thông báo hệ điều hành.
           </div>
         )}
 
-        <div className="mt-4 space-y-3">
-          <label className="flex items-center gap-2 text-sm font-medium text-slate-800">
+        <div className="mt-4 space-y-2.5">
+          <label className="flex items-center gap-2.5 text-sm font-medium text-[#18181B] cursor-pointer">
             <input
               type="checkbox"
               checked={reminderConfig.enabled}
               onChange={(e) => void handleUpdateReminder({ enabled: e.target.checked })}
-              className="rounded border-slate-300"
+              className="rounded border-[#D6D2C8]"
             />
             <span>Bật nhắc nhở ôn tập hằng ngày</span>
           </label>
 
-          <label className="flex items-center gap-2 text-sm text-slate-700">
+          <label className="flex items-center gap-2.5 text-sm text-[#52525B] cursor-pointer">
             <input
               type="checkbox"
               checked={reminderConfig.autostartOptIn}
               onChange={(e) => void handleUpdateReminder({ autostartOptIn: e.target.checked })}
-              className="rounded border-slate-300"
+              className="rounded border-[#D6D2C8]"
             />
             <span>Khởi động cùng Windows (Opt-in)</span>
           </label>
@@ -571,7 +607,10 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
 
         <div className="mt-4 grid gap-4 sm:grid-cols-3">
           <div>
-            <label htmlFor="reminder-local-time" className="block text-sm font-medium text-slate-700">
+            <label
+              htmlFor="reminder-local-time"
+              className="block text-xs font-semibold text-[#18181B] mb-1.5"
+            >
               Giờ nhắc
             </label>
             <input
@@ -579,12 +618,15 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
               type="time"
               value={reminderConfig.localTime}
               onChange={(e) => void handleUpdateReminder({ localTime: e.target.value })}
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              className="w-full rounded-xl border border-[#D6D2C8] bg-[#FAF9F6] px-3.5 py-2 text-sm"
             />
           </div>
 
           <div>
-            <label htmlFor="reminder-quiet-start" className="block text-sm font-medium text-slate-700">
+            <label
+              htmlFor="reminder-quiet-start"
+              className="block text-xs font-semibold text-[#18181B] mb-1.5"
+            >
               Giờ yên lặng (Bắt đầu)
             </label>
             <input
@@ -594,12 +636,15 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
               onChange={(e) =>
                 void handleUpdateReminder({ quietStart: e.target.value || null })
               }
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              className="w-full rounded-xl border border-[#D6D2C8] bg-[#FAF9F6] px-3.5 py-2 text-sm"
             />
           </div>
 
           <div>
-            <label htmlFor="reminder-quiet-end" className="block text-sm font-medium text-slate-700">
+            <label
+              htmlFor="reminder-quiet-end"
+              className="block text-xs font-semibold text-[#18181B] mb-1.5"
+            >
               Giờ yên lặng (Kết thúc)
             </label>
             <input
@@ -607,30 +652,30 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
               type="time"
               value={reminderConfig.quietEnd ?? ''}
               onChange={(e) => void handleUpdateReminder({ quietEnd: e.target.value || null })}
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              className="w-full rounded-xl border border-[#D6D2C8] bg-[#FAF9F6] px-3.5 py-2 text-sm"
             />
           </div>
         </div>
 
-        <div className="mt-4 flex flex-wrap items-center gap-3">
+        <div className="mt-4 flex flex-wrap items-center gap-2.5">
           <button
             type="button"
             onClick={handleSnooze30Min}
-            className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+            className="rounded-xl border border-[#E4E1DA] bg-white px-4 py-2 text-xs font-medium text-[#18181B] hover:bg-[#F3F1EC] cursor-pointer"
           >
             Tạm hoãn 30 phút (Snooze)
           </button>
           <button
             type="button"
             onClick={handleDismissToday}
-            className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+            className="rounded-xl border border-[#E4E1DA] bg-white px-4 py-2 text-xs font-medium text-[#18181B] hover:bg-[#F3F1EC] cursor-pointer"
           >
             Bỏ qua hôm nay (Dismiss)
           </button>
         </div>
 
         {reminderFeedbackVi && (
-          <p role="status" className="mt-3 text-sm font-medium text-emerald-700">
+          <p role="status" className="mt-3 text-xs font-semibold text-[#15803D]">
             {reminderFeedbackVi}
           </p>
         )}
@@ -639,24 +684,24 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
       {/* Section 4: Sao lưu & Khôi phục Dữ liệu Cục bộ */}
       <section
         aria-labelledby="settings-backup-heading"
-        className="rounded-xl border border-slate-200 bg-white p-6 shadow-xs"
+        className="rounded-2xl border border-[#E4E1DA] bg-white p-6 shadow-2xs"
       >
-        <h2 id="settings-backup-heading" className="text-lg font-semibold text-slate-900">
+        <h2 id="settings-backup-heading" className="text-base font-bold text-[#18181B]">
           4. Sao lưu &amp; Khôi phục Dữ liệu Cục bộ
         </h2>
 
-        <p className="mt-2 text-xs text-slate-600">
-          Quá trình khôi phục kiểm tra tính toàn vẹn mã băm SHA-256 trong thư mục tạm (staging folder)
-          trước khi áp dụng và không bao giờ bao gồm khóa API Gemini.
+        <p className="mt-1.5 text-xs text-[#52525B]">
+          Quá trình khôi phục kiểm tra tính toàn vẹn mã băm SHA-256 trong thư mục tạm (staging
+          folder) trước khi áp dụng và không bao giờ bao gồm khóa API Gemini.
         </p>
 
         <div className="mt-4 space-y-3">
-          <label className="flex items-center gap-2 text-sm text-slate-700">
+          <label className="flex items-center gap-2.5 text-sm text-[#18181B] cursor-pointer">
             <input
               type="checkbox"
               checked={includePdfsInBackup}
               onChange={(e) => setIncludePdfsInBackup(e.target.checked)}
-              className="rounded border-slate-300"
+              className="rounded border-[#D6D2C8]"
             />
             <span>Bao gồm các tệp sách PDF trong bản sao lưu</span>
           </label>
@@ -665,7 +710,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
             <button
               type="button"
               onClick={handleExportBackup}
-              className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+              className="rounded-xl bg-[#3F51B5] px-4 py-2 text-xs font-semibold text-white hover:bg-[#32408F] cursor-pointer"
             >
               Xuất bản sao lưu (.zip)
             </button>
@@ -674,7 +719,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
           {lastExportResult && (
             <div
               data-testid="backup-export-summary"
-              className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-xs text-emerald-900"
+              className="rounded-xl border border-[#22C55E]/35 bg-[#DCFCE7]/50 p-3 text-xs text-[#166534]"
             >
               Đã xuất: <strong>{lastExportResult.archiveFileName}</strong> (
               {lastExportResult.manifest.counts.books} sách,{' '}
@@ -684,9 +729,12 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
           )}
         </div>
 
-        <div className="mt-6 border-t border-slate-200 pt-4 space-y-3">
+        <div className="mt-6 border-t border-[#E4E1DA] pt-4 space-y-3">
           <div>
-            <label htmlFor="backup-file-input" className="block text-sm font-medium text-slate-700">
+            <label
+              htmlFor="backup-file-input"
+              className="block text-xs font-semibold text-[#18181B] mb-1.5"
+            >
               Chọn tệp sao lưu (.zip) để khôi phục
             </label>
             <input
@@ -694,27 +742,27 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
               type="file"
               accept=".zip,application/zip"
               onChange={(e) => void handleImportBackupFileChange(e)}
-              className="mt-1 block w-full text-sm text-slate-700"
+              className="mt-1 block w-full text-xs text-[#52525B]"
             />
           </div>
 
-          <label className="flex items-center gap-2 text-xs text-slate-700">
+          <label className="flex items-center gap-2.5 text-xs text-[#52525B] cursor-pointer">
             <input
               type="checkbox"
               checked={confirmRestoreChecked}
               onChange={(e) => setConfirmRestoreChecked(e.target.checked)}
-              className="rounded border-slate-300"
+              className="rounded border-[#D6D2C8]"
             />
             <span>
-              Tôi xác nhận khôi phục dữ liệu từ bản sao lưu (xác thực SHA-256 trong thư mục staging,
-              không ghi đè khóa API).
+              Tôi xác nhận khôi phục dữ liệu từ bản sao lưu (xác thực SHA-256 trong thư mục
+              staging, không ghi đè khóa API).
             </span>
           </label>
 
           <button
             type="button"
             onClick={handleImportBackup}
-            className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-800 hover:bg-slate-50"
+            className="rounded-xl border border-[#E4E1DA] bg-white px-4 py-2 text-xs font-medium text-[#18181B] hover:bg-[#F3F1EC] cursor-pointer"
           >
             Khôi phục từ bản sao lưu
           </button>
@@ -722,22 +770,22 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
           {lastRestoreResult && (
             <div
               data-testid="backup-restore-summary"
-              className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-xs text-emerald-900"
+              className="rounded-xl border border-[#22C55E]/35 bg-[#DCFCE7]/50 p-3 text-xs text-[#166534]"
             >
               Khôi phục thành công: {lastRestoreResult.restoredBooks} sách,{' '}
-              {lastRestoreResult.restoredHighlights} đánh dấu, {lastRestoreResult.restoredStudyCards}{' '}
-              thẻ ôn tập.
+              {lastRestoreResult.restoredHighlights} đánh dấu,{' '}
+              {lastRestoreResult.restoredStudyCards} thẻ ôn tập.
             </div>
           )}
         </div>
 
         {backupMessageVi && (
-          <p role="status" className="mt-3 text-sm font-medium text-emerald-700">
+          <p role="status" className="mt-3 text-xs font-semibold text-[#15803D]">
             {backupMessageVi}
           </p>
         )}
         {backupErrorVi && (
-          <p role="alert" className="mt-3 text-sm font-medium text-rose-700">
+          <p role="alert" className="mt-3 text-xs font-semibold text-[#DC2626]">
             {backupErrorVi}
           </p>
         )}

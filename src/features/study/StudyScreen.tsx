@@ -1,4 +1,12 @@
 import React, { useCallback, useEffect, useState } from 'react';
+import {
+  BookOpen,
+  CheckCircle2,
+  ExternalLink,
+  GraduationCap,
+  HelpCircle,
+  Sparkles,
+} from 'lucide-react';
 import { lexiBookClient } from '../../shared/api/client';
 import type {
   Book,
@@ -130,7 +138,14 @@ export const StudyScreen: React.FC<StudyScreenProps> = ({
         setSubmittingReview(false);
       }
     },
-    [currentCard, submittingReview, cardStartMs, turnRequestId, cardIndex, queueData, selectedBookId]
+    [
+      currentCard,
+      submittingReview,
+      cardStartMs,
+      turnRequestId,
+      sessionCompletedCount,
+      selectedBookId,
+    ]
   );
 
   useEffect(() => {
@@ -237,7 +252,7 @@ export const StudyScreen: React.FC<StudyScreenProps> = ({
 
   if (loading) {
     return (
-      <div className="p-8 text-center text-stone-600" role="status">
+      <div className="p-12 text-center text-[#52525B]" role="status">
         Đang tải phiên ôn tập FSRS...
       </div>
     );
@@ -246,21 +261,32 @@ export const StudyScreen: React.FC<StudyScreenProps> = ({
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-6">
       {/* Top Overview & Mode Bar */}
-      <div className="bg-white border border-stone-200 rounded-xl p-5 shadow-xs flex flex-wrap items-center justify-between gap-4">
-        <div className="space-y-1">
-          <h2 className="text-xl font-bold text-stone-900">Ôn tập Từ vựng Ngữ cảnh (FSRS)</h2>
-          <div className="flex flex-wrap items-center gap-3 text-xs text-stone-600">
+      <div className="bg-white border border-[#E4E1DA] rounded-2xl p-5 shadow-2xs flex flex-wrap items-center justify-between gap-4">
+        <div className="space-y-1.5">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-[#EEF2FF] text-[#3F51B5] flex items-center justify-center">
+              <GraduationCap className="w-4 h-4" />
+            </div>
+            <h2 className="text-lg font-bold text-[#18181B]">Ôn tập Từ vựng Ngữ cảnh (FSRS)</h2>
+          </div>
+          <div className="flex flex-wrap items-center gap-3 text-xs text-[#52525B]">
             <span data-testid="study-due-count">
-              Cần ôn hôm nay: <strong className="text-indigo-700">{queueData?.totalDueCount ?? 0}</strong>
+              Cần ôn hôm nay:{' '}
+              <strong className="text-[#3F51B5] font-semibold">
+                {queueData?.totalDueCount ?? 0}
+              </strong>
             </span>
             <span>•</span>
             <span data-testid="study-new-count">
-              Thẻ mới khả dụng: <strong className="text-amber-800">{queueData?.totalNewAvailableCount ?? 0}</strong>
+              Thẻ mới khả dụng:{' '}
+              <strong className="text-[#92400E] font-semibold">
+                {queueData?.totalNewAvailableCount ?? 0}
+              </strong>
             </span>
             <span>•</span>
             <span data-testid="study-reviewed-today">
               Đã ôn hôm nay:{' '}
-              <strong className="text-emerald-700">
+              <strong className="text-[#15803D] font-semibold">
                 {queueData?.reviewedTodayCount ?? 0}
               </strong>
             </span>
@@ -273,7 +299,7 @@ export const StudyScreen: React.FC<StudyScreenProps> = ({
             onChange={(e) => setSelectedBookId(e.target.value)}
             aria-label="Lọc theo sách"
             data-testid="study-book-filter"
-            className="px-3 py-1.5 text-xs border border-stone-300 rounded-lg bg-white"
+            className="px-3 py-1.5 text-xs border border-[#E4E1DA] rounded-xl bg-[#FAF9F6] text-[#18181B] font-medium"
           >
             <option value="all">Tất cả sách</option>
             {books.map((b) => (
@@ -283,15 +309,15 @@ export const StudyScreen: React.FC<StudyScreenProps> = ({
             ))}
           </select>
 
-          <div className="inline-flex bg-stone-100 p-1 rounded-lg">
+          <div className="inline-flex bg-[#F3F1EC] p-1 rounded-xl border border-[#E4E1DA]/70">
             <button
               type="button"
               onClick={() => setMode('flashcard')}
               data-testid="mode-flashcard-btn"
-              className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
+              className={`px-3.5 py-1.5 text-xs font-medium rounded-lg transition-all cursor-pointer ${
                 mode === 'flashcard'
-                  ? 'bg-white text-indigo-700 shadow-xs'
-                  : 'text-stone-600 hover:text-stone-900'
+                  ? 'bg-white text-[#3F51B5] font-semibold shadow-2xs'
+                  : 'text-[#52525B] hover:text-[#18181B]'
               }`}
             >
               Thẻ ghi nhớ (Flashcard)
@@ -300,13 +326,13 @@ export const StudyScreen: React.FC<StudyScreenProps> = ({
               type="button"
               onClick={() => setMode('quiz')}
               data-testid="mode-quiz-btn"
-              className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${
+              className={`px-3.5 py-1.5 text-xs font-medium rounded-lg transition-all cursor-pointer ${
                 mode === 'quiz'
-                  ? 'bg-white text-indigo-700 shadow-xs'
-                  : 'text-stone-600 hover:text-stone-900'
+                  ? 'bg-white text-[#3F51B5] font-semibold shadow-2xs'
+                  : 'text-[#52525B] hover:text-[#18181B]'
               }`}
             >
-              Trắc nghiệm & Điền từ (Quiz)
+              Trắc nghiệm &amp; Điền từ (Quiz)
             </button>
           </div>
         </div>
@@ -319,49 +345,56 @@ export const StudyScreen: React.FC<StudyScreenProps> = ({
         <div>
           {!currentCard ? (
             <EmptyState
+              icon={<CheckCircle2 className="w-6 h-6" />}
               title="Bạn đã hoàn thành toàn bộ thẻ cần ôn hôm nay!"
               description="Các từ vựng ở trạng thái Đã lưu (Saved) sẽ không tự động đưa vào hàng đợi trừ khi bạn chọn [Đưa vào Ôn tập] trong lúc đọc sách hoặc trong mục Từ vựng."
             />
           ) : (
             <div
               data-testid="flashcard-container"
-              className="bg-white border border-stone-200 rounded-2xl p-6 shadow-sm space-y-6"
+              className="bg-white border border-[#E4E1DA] rounded-2xl p-7 shadow-sm space-y-6"
             >
-              <div className="flex items-center justify-between text-xs text-stone-500">
+              <div className="flex items-center justify-between text-xs text-[#52525B]">
                 <div className="flex items-center gap-2">
-                  <Badge variant="neutral">{currentCard.bookTitle}</Badge>
+                  <Badge variant="indigo">
+                    <BookOpen className="w-3 h-3" />
+                    {currentCard.bookTitle}
+                  </Badge>
                   <span>Trang {currentCard.highlight.pageNumber1Based}</span>
                 </div>
-                <span>
+                <span className="font-medium text-[#18181B]">
                   Thẻ {cardIndex + 1} / {queueData?.sessionQueue.length ?? 1}
                 </span>
               </div>
 
               {/* Front of Card: Contextual Sentence with Masked Target */}
-              <div className="p-5 bg-stone-50 border border-stone-200 rounded-xl space-y-3">
-                <p className="text-xs font-medium text-stone-500 uppercase tracking-wide">
-                  Ngữ cảnh câu gốc trong sách:
+              <div className="p-6 bg-[#FAF9F6] border border-[#E4E1DA] rounded-2xl space-y-3">
+                <p className="text-[11px] font-semibold text-[#71717A] uppercase tracking-wider">
+                  Ngữ cảnh câu gốc trong sách
                 </p>
                 <p
                   data-testid="flashcard-masked-sentence"
-                  className="text-lg font-serif text-stone-900 leading-relaxed"
+                  className="text-xl font-serif text-[#18181B] leading-relaxed"
                 >
                   “{revealed ? currentCard.highlight.sentenceText : currentCard.maskedSentence}”
                 </p>
 
                 {!revealed && (
-                  <div className="pt-2 flex items-center gap-3">
+                  <div className="pt-2 flex flex-wrap items-center gap-3">
                     <Button
                       variant="ghost"
                       size="sm"
+                      leftIcon={<HelpCircle className="w-3.5 h-3.5" />}
                       onClick={() => setShowHint((h) => !h)}
                       data-testid="toggle-hint-btn"
                     >
                       {showHint ? 'Ẩn gợi ý' : 'Xem gợi ý nghĩa'}
                     </Button>
                     {showHint && (
-                      <span className="text-xs text-amber-900 bg-amber-50 px-2.5 py-1 rounded border border-amber-200">
-                        Gợi ý: {currentCard.sense.generalMeaningsVi[0] || currentCard.sense.contextualMeaningVi}
+                      <span className="text-xs text-[#92400E] bg-[#FEF3C7] px-3 py-1 rounded-lg border border-[#F59E0B]/40 font-medium">
+                        Gợi ý:{' '}
+                        {currentCard.sense.generalMeaningsVi[0] ||
+                          currentCard.sense.contextualMeaningVi}
                       </span>
                     )}
                   </div>
@@ -380,18 +413,21 @@ export const StudyScreen: React.FC<StudyScreenProps> = ({
                   </Button>
                 </div>
               ) : (
-                <div className="space-y-5 pt-2 border-t border-stone-200" data-testid="flashcard-back">
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2.5">
+                <div
+                  className="space-y-5 pt-4 border-t border-[#E4E1DA]"
+                  data-testid="flashcard-back"
+                >
+                  <div className="space-y-3">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <div className="flex flex-wrap items-center gap-2.5">
                         <h3
-                          className="text-2xl font-bold text-indigo-950"
+                          className="text-2xl font-bold text-[#18181B]"
                           data-testid="flashcard-target-word"
                         >
                           {currentCard.lexeme.canonicalForm}
                         </h3>
                         {currentCard.sense.ipa && (
-                          <span className="text-sm font-mono text-stone-500">
+                          <span className="text-sm font-mono text-[#3F51B5] bg-[#EEF2FF] px-2.5 py-0.5 rounded-lg">
                             {currentCard.sense.ipa}
                           </span>
                         )}
@@ -402,8 +438,9 @@ export const StudyScreen: React.FC<StudyScreenProps> = ({
 
                       {onJumpToOccurrence && (
                         <Button
-                          variant="ghost"
+                          variant="secondary"
                           size="sm"
+                          leftIcon={<ExternalLink className="w-3.5 h-3.5" />}
                           onClick={() =>
                             onJumpToOccurrence(
                               currentCard.highlight.bookId,
@@ -417,32 +454,33 @@ export const StudyScreen: React.FC<StudyScreenProps> = ({
                       )}
                     </div>
 
-                    <div className="p-3.5 bg-amber-50/70 border border-amber-200 rounded-xl space-y-1.5">
-                      <p className="text-xs font-semibold text-amber-950">
-                        Nghĩa trong ngữ cảnh sách:
+                    <div className="p-4 bg-[#FEF3C7]/45 border border-[#F59E0B]/35 rounded-2xl space-y-1.5">
+                      <p className="text-[11px] font-semibold uppercase tracking-wider text-[#92400E]">
+                        Nghĩa trong ngữ cảnh sách
                       </p>
-                      <p className="text-base font-semibold text-stone-900">
+                      <p className="text-base font-bold text-[#18181B]">
                         {currentCard.sense.contextualMeaningVi}
                       </p>
-                      <p className="text-sm text-stone-700">
+                      <p className="text-sm text-[#52525B] leading-relaxed">
                         {currentCard.sense.contextualExplanationVi}
                       </p>
                     </div>
 
                     {currentCard.sense.generalMeaningsVi.length > 0 && (
-                      <p className="text-xs text-stone-600">
-                        <strong>Nghĩa thông dụng:</strong>{' '}
+                      <p className="text-xs text-[#52525B]">
+                        <strong className="text-[#18181B]">Nghĩa thông dụng:</strong>{' '}
                         {currentCard.sense.generalMeaningsVi.join('; ')}
                       </p>
                     )}
                   </div>
 
                   {/* 4 FSRS Rating Buttons */}
-                  <div className="space-y-2">
-                    <p className="text-xs text-center text-stone-500">
-                      Đánh giá mức độ nhớ của bạn để thuật toán FSRS lên lịch ôn tập tiếp theo:
+                  <div className="space-y-2.5 pt-2">
+                    <p className="text-xs text-center text-[#52525B]">
+                      Đánh giá mức độ nhớ của bạn để thuật toán FSRS lên lịch ôn tập tiếp theo (Phím
+                      tắt 1–4):
                     </p>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                       <Button
                         variant="danger"
                         disabled={submittingReview}
@@ -486,13 +524,13 @@ export const StudyScreen: React.FC<StudyScreenProps> = ({
 
       {/* Quiz Mode */}
       {mode === 'quiz' && (
-        <div className="bg-white border border-stone-200 rounded-2xl p-6 shadow-sm space-y-5">
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-stone-200 pb-4">
+        <div className="bg-white border border-[#E4E1DA] rounded-2xl p-6 shadow-sm space-y-5">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#E4E1DA] pb-4">
             <div>
-              <h3 className="text-base font-bold text-stone-900">
-                Kiểm tra Ngữ cảnh & Điền từ (Contextual Quiz)
+              <h3 className="text-base font-bold text-[#18181B]">
+                Kiểm tra Ngữ cảnh &amp; Điền từ (Contextual Quiz)
               </h3>
-              <p className="text-xs text-stone-500">
+              <p className="text-xs text-[#52525B] mt-0.5">
                 Lưu ý: Kết quả bài kiểm tra được ghi nhận độc lập và không làm sai lệch lịch trình
                 FSRS của thẻ ghi nhớ.
               </p>
@@ -503,7 +541,7 @@ export const StudyScreen: React.FC<StudyScreenProps> = ({
                 value={quizSize}
                 onChange={(e) => setQuizSize(Number(e.target.value) as 5 | 10 | 20)}
                 aria-label="Số câu hỏi kiểm tra"
-                className="px-2.5 py-1.5 text-xs border border-stone-300 rounded-lg bg-white"
+                className="px-3 py-1.5 text-xs border border-[#E4E1DA] rounded-xl bg-[#FAF9F6] text-[#18181B]"
               >
                 <option value={5}>5 câu hỏi</option>
                 <option value={10}>10 câu hỏi</option>
@@ -512,6 +550,7 @@ export const StudyScreen: React.FC<StudyScreenProps> = ({
               <Button
                 variant="primary"
                 size="sm"
+                leftIcon={<Sparkles className="w-3.5 h-3.5" />}
                 onClick={() => void handleStartQuiz()}
                 data-testid="start-quiz-btn"
               >
@@ -524,12 +563,12 @@ export const StudyScreen: React.FC<StudyScreenProps> = ({
 
           {quizFinished ? (
             <div data-testid="quiz-summary" className="space-y-4">
-              <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center justify-between">
+              <div className="p-5 bg-[#DCFCE7]/50 border border-[#22C55E]/35 rounded-2xl flex items-center justify-between">
                 <div>
-                  <h4 className="text-base font-bold text-emerald-950">
+                  <h4 className="text-base font-bold text-[#166534]">
                     Hoàn thành bài kiểm tra!
                   </h4>
-                  <p className="text-xs text-emerald-800">
+                  <p className="text-xs text-[#15803D] mt-0.5">
                     Số câu đúng: {quizAnswers.filter((a) => a.isCorrect).length} /{' '}
                     {quizAnswers.length} (
                     {quizAnswers.length > 0
@@ -547,10 +586,10 @@ export const StudyScreen: React.FC<StudyScreenProps> = ({
             </div>
           ) : currentQuizQuestion ? (
             <div data-testid="quiz-question-card" className="space-y-4">
-              <div className="flex items-center justify-between text-xs text-stone-500">
+              <div className="flex items-center justify-between text-xs text-[#52525B]">
                 <span>
-                  Câu {quizIndex + 1} / {quizQuestions.length} • {currentQuizQuestion.bookTitle} (Tr.{' '}
-                  {currentQuizQuestion.pageNumber1Based})
+                  Câu {quizIndex + 1} / {quizQuestions.length} • {currentQuizQuestion.bookTitle}{' '}
+                  (Tr. {currentQuizQuestion.pageNumber1Based})
                 </span>
                 <Badge variant="amber">
                   {currentQuizQuestion.questionType === 'mcq_meaning'
@@ -560,16 +599,16 @@ export const StudyScreen: React.FC<StudyScreenProps> = ({
               </div>
 
               {currentQuizQuestion.questionType === 'mcq_meaning' ? (
-                <div className="space-y-3">
-                  <p className="text-sm text-stone-700">
+                <div className="space-y-3.5">
+                  <p className="text-sm text-[#18181B]">
                     Chọn nghĩa tiếng Việt phù hợp nhất cho cụm từ{' '}
-                    <strong className="text-indigo-700">“{currentQuizQuestion.targetTerm}”</strong>{' '}
+                    <strong className="text-[#3F51B5]">“{currentQuizQuestion.targetTerm}”</strong>{' '}
                     trong câu sau:
                   </p>
-                  <blockquote className="p-3 bg-stone-50 border-l-4 border-indigo-500 font-serif text-stone-900">
+                  <blockquote className="p-4 bg-[#FAF9F6] rounded-xl border-l-4 border-[#3F51B5] font-serif text-[#18181B]">
                     “{currentQuizQuestion.promptEn}”
                   </blockquote>
-                  <div className="grid grid-cols-1 gap-2">
+                  <div className="grid grid-cols-1 gap-2.5">
                     {currentQuizQuestion.optionsVi?.map((opt, idx) => (
                       <button
                         key={idx}
@@ -577,10 +616,10 @@ export const StudyScreen: React.FC<StudyScreenProps> = ({
                         disabled={questionChecked}
                         data-testid={`quiz-option-${idx}`}
                         onClick={() => setSelectedOption(opt)}
-                        className={`text-left p-3 rounded-lg border text-sm transition-colors ${
+                        className={`text-left p-3.5 rounded-xl border text-sm transition-all cursor-pointer ${
                           selectedOption === opt
-                            ? 'border-indigo-600 bg-indigo-50 text-indigo-950 font-medium'
-                            : 'border-stone-200 hover:bg-stone-50 text-stone-800'
+                            ? 'border-[#3F51B5] bg-[#EEF2FF] text-[#18181B] font-semibold shadow-2xs'
+                            : 'border-[#E4E1DA] hover:bg-[#FAF9F6] text-[#18181B]'
                         }`}
                       >
                         {opt}
@@ -589,13 +628,13 @@ export const StudyScreen: React.FC<StudyScreenProps> = ({
                   </div>
                 </div>
               ) : (
-                <div className="space-y-3">
-                  <p className="text-sm text-stone-700">
+                <div className="space-y-3.5">
+                  <p className="text-sm text-[#18181B]">
                     Điền từ hoặc cụm từ tiếng Anh còn thiếu vào chỗ trống trong câu gốc:
                   </p>
                   <blockquote
                     data-testid="quiz-cloze-prompt"
-                    className="p-3 bg-stone-50 border-l-4 border-amber-500 font-serif text-stone-900"
+                    className="p-4 bg-[#FAF9F6] rounded-xl border-l-4 border-[#F59E0B] font-serif text-[#18181B]"
                   >
                     “{currentQuizQuestion.maskedSentenceEn}”
                   </blockquote>
@@ -606,7 +645,7 @@ export const StudyScreen: React.FC<StudyScreenProps> = ({
                     onChange={(e) => setClozeInput(e.target.value)}
                     placeholder="Nhập từ/cụm từ tiếng Anh..."
                     data-testid="quiz-cloze-input"
-                    className="w-full px-3 py-2 text-sm border border-stone-300 rounded-lg"
+                    className="w-full px-3.5 py-2.5 text-sm border border-[#D6D2C8] rounded-xl"
                   />
                 </div>
               )}
@@ -622,11 +661,16 @@ export const StudyScreen: React.FC<StudyScreenProps> = ({
                   </Button>
                 </div>
               ) : (
-                <div className="p-4 bg-stone-100 rounded-xl space-y-2" data-testid="quiz-feedback-panel">
-                  <p className="text-sm font-bold text-stone-900">
+                <div
+                  className="p-4 bg-[#FAF9F6] border border-[#E4E1DA] rounded-2xl space-y-2"
+                  data-testid="quiz-feedback-panel"
+                >
+                  <p className="text-sm font-bold text-[#18181B]">
                     Đáp án đúng: {currentQuizQuestion.correctAnswer}
                   </p>
-                  <p className="text-xs text-stone-700">{currentQuizQuestion.explanationVi}</p>
+                  <p className="text-xs text-[#52525B] leading-relaxed">
+                    {currentQuizQuestion.explanationVi}
+                  </p>
                   <div className="flex justify-end pt-1">
                     <Button
                       variant="primary"
@@ -643,9 +687,9 @@ export const StudyScreen: React.FC<StudyScreenProps> = ({
               )}
             </div>
           ) : (
-            <p className="text-sm text-stone-500 text-center py-6">
-              Nhấn <strong>[Bắt đầu bài kiểm tra]</strong> để tạo bộ câu hỏi từ các thẻ đang học của
-              bạn.
+            <p className="text-sm text-[#52525B] text-center py-8">
+              Nhấn <strong className="text-[#18181B]">[Bắt đầu bài kiểm tra]</strong> để tạo bộ câu
+              hỏi từ các thẻ đang học của bạn.
             </p>
           )}
         </div>
