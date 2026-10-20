@@ -1,0 +1,67 @@
+@import "tailwindcss";
+
+:root {
+  --bg-canvas: #F8F6F1;
+  --bg-surface: #FFFFFF;
+  --bg-subtle: #F1EFEA;
+  --text-primary: #1E2024;
+  --text-secondary: #525866;
+  --accent-indigo: #3F51B5;
+  --accent-indigo-hover: #303F9F;
+  --highlight-amber: rgba(251, 191, 36, 0.36);
+  --highlight-amber-active: rgba(245, 158, 11, 0.58);
+  --success-green: #15803D;
+  --border-subtle: #E2DFD7;
+}
+
+.dark {
+  --bg-canvas: #141619;
+  --bg-surface: #1E2025;
+  --bg-subtle: #272A30;
+  --text-primary: #F3F4F6;
+  --text-secondary: #9CA3AF;
+  --accent-indigo: #6366F1;
+  --accent-indigo-hover: #818CF8;
+  --highlight-amber: rgba(251, 191, 36, 0.34);
+  --highlight-amber-active: rgba(245, 158, 11, 0.55);
+  --success-green: #22C55E;
+  --border-subtle: #32363F;
+}
+
+body {
+  font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+  background-color: var(--bg-canvas);
+  color: var(--text-primary);
+  margin: 0;
+}
+
+/* Accessible focus ring */
+*:focus-visible {
+  outline: 2px solid var(--accent-indigo);
+  outline-offset: 2px;
+}
+
+/* PDF text layer styling for accurate native text selection */
+.lexibook-pdf-text-layer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  line-height: 1;
+  text-size-adjust: none;
+  forced-color-adjust: none;
+  transform-origin: 0 0;
+  z-index: 20;
+  user-select: text;
+}
+
+.lexibook-pdf-text-layer span {
+  color: transparent;
+  position: absolute;
+  white-space: pre;
+  cursor: text;
+  transform-origin: 0% 0%;
+}
+
+.lexibook-pdf-text-layer ::selection {
+  background: rgba(63, 81, 181, 0.28);
+}

@@ -1,0 +1,50 @@
+{
+  "name": "lexibook-ai",
+  "private": true,
+  "version": "0.1.0",
+  "description": "LexiBook AI — Local-first Windows English PDF reader with contextual AI vocabulary and FSRS spaced repetition",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src tests",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "tauri": "tauri",
+    "tauri:dev": "tauri dev",
+    "tauri:build": "tauri build",
+    "fixtures:generate": "node scripts/generate_pdf_fixtures.mjs"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^2.2.0",
+    "fflate": "^0.8.2",
+    "lucide-react": "^0.469.0",
+    "pdfjs-dist": "^4.10.38",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "ts-fsrs": "^4.5.0",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.17.0",
+    "@playwright/test": "^1.49.1",
+    "@tailwindcss/vite": "^4.0.0",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.1.0",
+    "@testing-library/user-event": "^14.5.2",
+    "@types/node": "^22.10.2",
+    "@types/react": "^19.0.2",
+    "@types/react-dom": "^19.0.2",
+    "@vitejs/plugin-react": "^4.3.4",
+    "eslint": "^9.17.0",
+    "jsdom": "^25.0.1",
+    "tailwindcss": "^4.0.0",
+    "typescript": "^5.7.2",
+    "typescript-eslint": "^8.18.1",
+    "vite": "^6.0.5",
+    "vitest": "^2.1.8"
+  }
+}

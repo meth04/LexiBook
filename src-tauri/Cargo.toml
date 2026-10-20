@@ -1,0 +1,36 @@
+[package]
+name = "lexibook-ai"
+version = "0.1.0"
+description = "LexiBook AI — Local-first Windows English PDF reader with contextual AI vocabulary and FSRS spaced repetition"
+authors = ["LexiBook Engineering"]
+license = "MIT"
+edition = "2021"
+
+[lib]
+name = "lexibook_ai_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2.0.5", features = [] }
+
+[dependencies]
+tauri = { version = "2.2.0", features = ["tray-icon"] }
+tauri-plugin-notification = "2.2.0"
+tauri-plugin-autostart = "2.2.0"
+serde = { version = "1.0.217", features = ["derive"] }
+serde_json = "1.0.135"
+rusqlite = { version = "0.32.1", features = ["bundled"] }
+sha2 = "0.10.8"
+hex = "0.4.3"
+base64 = "0.22.1"
+uuid = { version = "1.11.0", features = ["v4"] }
+chrono = { version = "0.4.39", features = ["serde"] }
+keyring = "3.6.1"
+reqwest = { version = "0.12.12", default-features = false, features = ["json", "rustls-tls"] }
+zip = { version = "2.2.2", default-features = false, features = ["deflate"] }
+unicode-normalization = "0.1.24"
+thiserror = "2.0.9"
+tokio = { version = "1.42.0", features = ["rt-multi-thread", "macros", "time", "sync"] }
+
+[dev-dependencies]
+tempfile = "3.15.0"

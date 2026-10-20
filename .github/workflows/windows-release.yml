@@ -1,0 +1,83 @@
+name: LexiBook AI — Windows Desktop Release & Verification
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-and-package-windows:
+    name: Verify & Build Windows Tauri Installer
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - name: Setup Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Setup Rust stable toolchain (MSVC)
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-pc-windows-msvc
+
+      - name: Cache Rust cargo target
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: 'src-tauri -> target'
+
+      - name: Validate kit integrity
+        run: python scripts/validate_kit.py
+
+      - name: Install npm dependencies from lockfile
+        run: npm ci
+
+      - name: Generate deterministic PDF test fixtures
+        run: node scripts/generate_pdf_fixtures.mjs
+
+      - name: TypeScript strict typecheck
+        run: npm run typecheck
+
+      - name: ESLint static analysis
+        run: npm run lint
+
+      - name: Run Vitest unit, integration & E2E persistence suite
+        run: npm run test
+
+      - name: Build production frontend bundle
+        run: npm run build
+
+      - name: Run SEC-01 secret scan on dist/ and source
+        run: node scripts/secret_scan.mjs
+
+      - name: Rust cargo fmt, clippy & unit tests
+        working-directory: src-tauri
+        run: |
+          cargo fmt --all -- --check
+          cargo clippy --all-targets -- -D warnings
+          cargo test
+
+      - name: Build Windows Tauri v2 MSI & NSIS installers
+        run: npm run tauri build
+
+      - name: Compute SHA-256 checksums for Windows installers
+        shell: pwsh
+        run: |
+          Get-ChildItem -Recurse src-tauri/target/release/bundle -Include *.msi, *.exe | ForEach-Object {
+            $hash = (Get-FileHash $_.FullName -Algorithm SHA256).Hash
+            Write-Host "$hash  $($_.Name)"
+          }
